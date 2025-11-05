@@ -1,0 +1,40 @@
+.card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  flex: 1 1 250px;
+  min-width: 250px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card h3 {
+  font-size: 20px;
+  margin-bottom: 10px;
+  color: #1e293b;
+}
+
+.card p {
+  color: #475569;
+  font-size: 16px;
+}
+
+.progressBar {
+  background-color: #e2e8f0;
+  border-radius: 8px;
+  height: 8px;
+  margin-top: 12px;
+  overflow: hidden;
+}
+
+.progressFill {
+  background-color: #3b82f6; /* синий акцент */
+  height: 100%;
+  border-radius: 8px;
+  transition: width 0.3s ease;
+}
