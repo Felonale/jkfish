@@ -1,0 +1,8 @@
+.container {
+  padding: 20px;
+}
+.cards {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
