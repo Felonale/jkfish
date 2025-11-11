@@ -32,14 +32,14 @@
   gap: 1rem;
 }
 
-label {
+.form label {
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
   font-weight: 600;
 }
 
-input {
+.form input {
   border-radius: 12px;
   border: 1px solid rgba(148, 163, 184, 0.35);
   background: rgba(15, 23, 42, 0.6);
@@ -47,7 +47,7 @@ input {
   color: #f8fafc;
 }
 
-button {
+.form button {
   border: none;
   border-radius: 12px;
   padding: 0.9rem 1.2rem;
@@ -59,9 +59,7 @@ button {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-}
-
-button:disabled {
+.form button:disabled {
   opacity: 0.7;
   cursor: not-allowed;
 }

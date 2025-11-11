@@ -102,29 +102,29 @@
   background: rgba(2, 6, 23, 0.7);
 }
 
-table {
+.table {
   width: 100%;
   border-collapse: collapse;
 }
 
-th,
-td {
+.table th,
+.table td {
   padding: 1rem 1.25rem;
   text-align: left;
 }
 
-th {
+.table th {
   text-transform: uppercase;
   font-size: 0.8rem;
   letter-spacing: 0.15em;
   color: rgba(248, 250, 252, 0.7);
 }
 
-tbody tr:nth-child(odd) {
+.table tbody tr:nth-child(odd) {
   background: rgba(15, 23, 42, 0.35);
 }
 
-tbody tr:hover {
+.table tbody tr:hover {
   background: rgba(124, 58, 237, 0.08);
 }
 
@@ -139,8 +139,8 @@ tbody tr:hover {
     align-items: stretch;
   }
 
-  th,
-  td {
+  .table th,
+  .table td {
     padding: 0.85rem;
   }
 }

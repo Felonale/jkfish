@@ -107,7 +107,7 @@ export default function GradesPage() {
         </div>
 
         <div className={styles.tableWrapper}>
-          <table>
+          <table className={styles.table}>
             <thead>
               <tr>
                 <th>Задание</th>
