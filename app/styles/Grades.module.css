@@ -1,19 +1,146 @@
-.container {
-  padding: 40px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.container h2 {
-  font-size: 28px;
-  font-weight: 600;
-  color: #1e293b;
-  margin-bottom: 30px;
-}
-
-.cards {
+.page {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
+  gap: 2.5rem;
+}
+
+.header {
+  display: flex;
   flex-wrap: wrap;
-  justify-content: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem;
+  border-radius: 24px;
+  border: 1px solid rgba(124, 58, 237, 0.25);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.header h2 {
+  margin: 0.5rem 0 0;
+  font-size: 1.8rem;
+  color: #f8fafc;
+}
+
+.header p {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.35em;
+  font-size: 0.78rem;
+  color: rgba(248, 250, 252, 0.6);
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.syncButton {
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #7c3aed, #22d3ee);
+  color: #fdf4ff;
+  font-weight: 600;
+}
+
+.exportLink {
+  padding: 0.75rem 1.2rem;
+  border-radius: 12px;
+  border: 1px solid rgba(248, 250, 252, 0.2);
+  text-decoration: none;
+  color: #e2e8f0;
+}
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.cardLink {
+  text-decoration: none;
+}
+
+.detailSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sectionHeading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.sectionHeading h3 {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.sectionHeading span {
+  color: var(--text-muted);
+}
+
+.sectionLink {
+  text-decoration: none;
+  color: #a855f7;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+}
+
+.tableWrapper {
+  border-radius: 20px;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  overflow: hidden;
+  background: rgba(2, 6, 23, 0.7);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 1rem 1.25rem;
+  text-align: left;
+}
+
+th {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
+  color: rgba(248, 250, 252, 0.7);
+}
+
+tbody tr:nth-child(odd) {
+  background: rgba(15, 23, 42, 0.35);
+}
+
+tbody tr:hover {
+  background: rgba(124, 58, 237, 0.08);
+}
+
+@media (max-width: 720px) {
+  .header {
+    flex-direction: column;
+  }
+
+  .actions {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  th,
+  td {
+    padding: 0.85rem;
+  }
 }

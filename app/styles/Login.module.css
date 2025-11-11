@@ -1,22 +1,105 @@
-.login {
-  padding: 20px;
+.page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+  padding: 2.5rem;
+  border-radius: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  background: rgba(2, 6, 23, 0.85);
 }
 
-.loginForm {
+.branding p {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.4em;
+  font-size: 0.78rem;
+  color: rgba(248, 250, 252, 0.6);
+}
+
+.branding h1 {
+  margin: 0.75rem 0;
+  font-size: 2rem;
+  color: #f8fafc;
+}
+
+.branding span {
+  color: var(--text-muted);
+}
+
+.form {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1rem;
 }
 
-.loginInput {
-  padding: 8px;
-  font-size: 1rem;
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-weight: 600;
 }
 
-.loginButton {
-  padding: 10px;
-  background-color: #003366;
-  color: white;
+input {
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(15, 23, 42, 0.6);
+  padding: 0.85rem 1rem;
+  color: #f8fafc;
+}
+
+button {
   border: none;
+  border-radius: 12px;
+  padding: 0.9rem 1.2rem;
+  font-weight: 600;
+  background: linear-gradient(135deg, #a855f7, #6366f1);
+  color: #fdf4ff;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+.message {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #fde68a;
+}
+
+.links {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+}
+
+.links a {
+  color: #a855f7;
+  text-decoration: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding: 1.5rem;
+  }
+
+  .links {
+    flex-direction: column;
+    gap: 0.4rem;
+  }
 }
