@@ -4,7 +4,6 @@ import { FormEvent, useState } from 'react';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import styles from '../styles/Login.module.css';
 
 export default function LoginPage() {
   const supabase = createClient();
@@ -18,28 +17,28 @@ export default function LoginPage() {
     setPending(true);
     setMessage(null);
 
-    // Стандартная авторизация Supabase — замените на OAuth, если нужно.
     const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-    if (error) {
-      setMessage(error.message);
-    } else {
-      setMessage('Готово! Мы перенаправим вас на защищённые страницы.');
-    }
-
+    setMessage(
+      error ? error.message : 'Готово! Мы перенаправим вас на защищённые страницы в течение секунды.',
+    );
     setPending(false);
   };
 
   return (
-    <div className={styles.page}>
-      <div className={styles.branding}>
-        <p>JKFish Academy</p>
-        <h1>Войдите и продолжите прогресс.</h1>
-        <span>Вся аналитика и материалы синхронизируются через Supabase и защищены SSO.</span>
+    <div className="grid gap-8 rounded-[32px] border border-white/15 bg-white/5 p-8 text-white lg:grid-cols-2">
+      <div className="space-y-4">
+        <p className="text-xs uppercase tracking-[0.35em] text-slate-300">JKFish Academy</p>
+        <h1 className="text-3xl font-semibold">
+          Войдите и продолжайте прокачивать свой прогресс в Supabase.
+        </h1>
+        <span className="text-sm text-slate-300">
+          Все аналитики и расписания синхронизируются через Supabase и защищены SSO.
+        </span>
       </div>
 
-      <form className={styles.form} onSubmit={handleLogin}>
-        <label>
+      <form onSubmit={handleLogin} className="space-y-4 rounded-3xl border border-white/10 bg-slate-900/50 p-6">
+        <label className="flex flex-col gap-2 text-sm font-semibold text-slate-200">
           Email
           <input
             type="email"
@@ -47,10 +46,11 @@ export default function LoginPage() {
             onChange={event => setEmail(event.target.value)}
             placeholder="you@jkfish.dev"
             required
+            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
           />
         </label>
 
-        <label>
+        <label className="flex flex-col gap-2 text-sm font-semibold text-slate-200">
           Пароль
           <input
             type="password"
@@ -58,13 +58,18 @@ export default function LoginPage() {
             onChange={event => setPassword(event.target.value)}
             placeholder="••••••••"
             required
+            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
           />
         </label>
 
-        <button type="submit" disabled={pending}>
+        <button
+          type="submit"
+          disabled={pending}
+          className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-3 text-sm font-semibold text-white disabled:opacity-60"
+        >
           {pending ? (
             <>
-              <Loader2 className={styles.spinner} size={18} />
+              <Loader2 className="animate-spin" size={18} />
               Подключаем Supabase…
             </>
           ) : (
@@ -72,9 +77,9 @@ export default function LoginPage() {
           )}
         </button>
 
-        {message && <p className={styles.message}>{message}</p>}
+        {message && <p className="text-sm text-amber-200">{message}</p>}
 
-        <div className={styles.links}>
+        <div className="flex flex-wrap justify-between text-sm text-violet-200">
           <Link href="/auth/reset">Забыли пароль?</Link>
           <Link href="/auth/signup">Создать аккаунт</Link>
         </div>

@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { ArrowRight, Clock3, PlayCircle } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
 import Card from './components/Card';
-import styles from './styles/Home.module.css';
+
+export const revalidate = 0;
 
 type LearningTrack = {
   id: string;
@@ -22,61 +23,6 @@ type UpcomingSession = {
   focus?: string;
 };
 
-const fallbackData: { tracks: LearningTrack[]; sessions: UpcomingSession[] } = {
-  tracks: [
-    {
-      id: 'algorithms',
-      title: 'Алгоритмы и структуры данных',
-      description: 'Практикум по сложным задачам + live-кодинг с наставником.',
-      progress: 72,
-      updatedAt: 'Обновлено 2 часа назад',
-      highlight: 'Спринт #3',
-    },
-    {
-      id: 'ml',
-      title: 'Машинное обучение',
-      description: 'Работа с Supabase Vector и быстрая доставка модели в Vercel.',
-      progress: 64,
-      updatedAt: 'Синхронизировано сегодня в 08:15',
-      highlight: 'Labs',
-    },
-    {
-      id: 'uiux',
-      title: 'UX-стратегии и прототипирование',
-      description: 'Сбор обратной связи и гипотезы для нового дашборда.',
-      progress: 85,
-      updatedAt: 'Вчера · 21:40',
-      highlight: 'DesignOps',
-    },
-  ],
-  sessions: [
-    {
-      id: 'session-1',
-      title: 'Deep Dive по ядру Supabase',
-      mentor: 'Кирилл Мещеряков',
-      start: 'Сегодня · 18:30',
-      location: 'Zoom · комната #3',
-      focus: 'Практика',
-    },
-    {
-      id: 'session-2',
-      title: 'Разбор задач по дискретной математике',
-      mentor: 'Екатерина Ли',
-      start: 'Завтра · 09:00',
-      location: 'Кампус · аудитория D4',
-      focus: 'Семинар',
-    },
-    {
-      id: 'session-3',
-      title: 'Product review спринта',
-      mentor: 'Алексей Ким',
-      start: 'Четверг · 14:00',
-      location: 'Miro board · live',
-      focus: 'Review',
-    },
-  ],
-};
-
 async function fetchDashboardData(): Promise<{
   tracks: LearningTrack[];
   sessions: UpcomingSession[];
@@ -85,41 +31,29 @@ async function fetchDashboardData(): Promise<{
     const supabase = await createClient();
 
     const [
-      {
-        data: tracksData,
-        error: tracksError,
-      },
-      {
-        data: sessionsData,
-        error: sessionsError,
-      },
+      { data: tracksData, error: tracksError },
+      { data: sessionsData, error: sessionsError },
     ] = await Promise.all([
-      // Пример запроса: замените имена таблиц на свои при подключении настоящих данных.
       supabase
         .from('learning_tracks')
         .select('id,title,description,progress,updated_at,highlight')
         .order('updated_at', { ascending: false })
-        .limit(3),
+        .limit(6),
       supabase
         .from('upcoming_sessions')
         .select('id,title,mentor,start_at,location,focus')
         .order('start_at', { ascending: true })
-        .limit(3),
+        .limit(6),
     ]);
 
-    if (tracksError) {
-      throw tracksError;
-    }
-
-    if (sessionsError) {
-      throw sessionsError;
-    }
+    if (tracksError) throw tracksError;
+    if (sessionsError) throw sessionsError;
 
     const tracks =
       tracksData?.map(track => ({
         id: String(track.id),
-        title: track.title ?? 'Неизвестный модуль',
-        description: track.description ?? 'Описание скоро появится.',
+        title: track.title ?? 'Название предмета',
+        description: track.description ?? 'Описание появится позже.',
         progress: Math.round(track.progress ?? 0),
         updatedAt: track.updated_at
           ? new Intl.DateTimeFormat('ru-RU', {
@@ -148,13 +82,10 @@ async function fetchDashboardData(): Promise<{
         focus: session.focus ?? undefined,
       })) ?? [];
 
-    return {
-      tracks: tracks.length ? tracks : fallbackData.tracks,
-      sessions: sessions.length ? sessions : fallbackData.sessions,
-    };
+    return { tracks, sessions };
   } catch (error) {
     console.error('Не удалось получить данные Supabase', error);
-    return fallbackData;
+    return { tracks: [], sessions: [] };
   }
 }
 
@@ -175,85 +106,122 @@ export default async function HomePage() {
       value: nextSession?.start ?? '—',
       meta: nextSession?.title ?? 'Запланируйте событие',
     },
-    { label: 'Подготовленные конспекты', value: '12', meta: 'офлайн доступ' },
+    { label: 'Конспектов', value: '12', meta: 'доступны офлайн' },
   ];
 
   return (
-    <div className={styles.dashboard}>
-      <section className={styles.hero}>
-        <div className={styles.heroCopy}>
-          <p>Командный образовательный поток</p>
-          <h2>Учись гибко, получай точную аналитику и оставайся в фокусе.</h2>
-          <span>
+    <div className="space-y-10">
+      <section className="grid gap-6 rounded-[32px] border border-white/15 bg-white/5 p-8 shadow-2xl lg:grid-cols-[1.4fr_0.6fr]">
+        <div className="space-y-4 text-white">
+          <p className="text-xs uppercase tracking-[0.35em] text-slate-300">
+            Командный образовательный поток
+          </p>
+          <h2 className="text-3xl font-semibold">
+            Учись гибко, получай аналитику и держи все данные в одном месте.
+          </h2>
+          <span className="block text-sm text-slate-300">
             Поддерживаем Supabase Auth, таблицы прогресса и любые кастомные источники данных.
             Запускайте платформу на Vercel без долгой подготовки.
           </span>
-          <div className={styles.heroActions}>
-            <Link href="/protected" className={styles.primaryAction}>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/protected"
+              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-900"
+            >
               Начать спринт
               <ArrowRight size={16} />
             </Link>
-            <Link href="/grades" className={styles.secondaryAction}>
+            <Link
+              href="/grades"
+              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-2 text-sm font-semibold text-white"
+            >
               Смотреть аналитику
             </Link>
           </div>
         </div>
 
-        <div className={styles.heroPanel}>
+        <div className="grid gap-3 rounded-3xl border border-white/10 bg-slate-950/70 p-4">
           {heroStats.map(stat => (
-            <div key={stat.label}>
-              <span>{stat.label}</span>
-              <strong>{stat.value}</strong>
-              <p>{stat.meta}</p>
+            <div key={stat.label} className="rounded-2xl border border-white/5 bg-white/5 p-4">
+              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                {stat.label}
+              </span>
+              <strong className="mt-2 block text-2xl text-white">{stat.value}</strong>
+              <p className="text-sm text-slate-400">{stat.meta}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section className={styles.section}>
-        <div className={styles.sectionHeading}>
-          <h3>Прогресс по курсам</h3>
-          <span>Данные подтягиваются из Supabase таблицы learning_tracks</span>
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-semibold text-white">Прогресс по курсам</h3>
+            <span className="text-sm text-slate-400">
+              Данные подтягиваются из таблицы learning_tracks
+            </span>
+          </div>
         </div>
-        <div className={styles.cardGrid}>
-          {tracks.map(track => (
-            <Card
-              key={track.id}
-              eyebrow={track.highlight ?? 'Курс'}
-              title={track.title}
-              description={track.description}
-              percent={track.progress}
-              footer={track.updatedAt}
-              highlight={`${track.progress >= 80 ? 'Приоритет: высокий' : 'В пути'}`}
-            />
-          ))}
-        </div>
+        {tracks.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-4 text-sm text-slate-400">
+            Нет данных в Supabase. Добавьте записи в таблицу learning_tracks.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+            {tracks.map(track => (
+              <Card
+                key={track.id}
+                eyebrow={track.highlight ?? 'Курс'}
+                title={track.title}
+                description={track.description}
+                percent={track.progress}
+                footer={track.updatedAt}
+                highlight={
+                  track.highlight ?? (track.progress >= 80 ? 'Высокий приоритет' : 'В работе')
+                }
+              />
+            ))}
+          </div>
+        )}
       </section>
 
-      <section className={styles.section}>
-        <div className={styles.sectionHeading}>
-          <h3>Ближайшие занятия</h3>
-          <span>Планируйте недели вперёд и держите группу в одном темпе.</span>
+      <section className="space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div>
+            <h3 className="text-xl font-semibold text-white">Ближайшие занятия</h3>
+            <span className="text-sm text-slate-400">
+              Планируйте недели вперёд и держите группу в одном темпе.
+            </span>
+          </div>
         </div>
-        <div className={styles.sessionList}>
-          {sessions.map(session => (
-            <article key={session.id} className={styles.sessionCard}>
-              <div className={styles.sessionBadge}>
-                <PlayCircle size={18} />
-                {session.focus ?? 'Live'}
-              </div>
-              <h4>{session.title}</h4>
-              <p>{session.mentor}</p>
-              <div className={styles.sessionMeta}>
-                <span>
-                  <Clock3 size={16} />
-                  {session.start}
-                </span>
-                <span>{session.location}</span>
-              </div>
-            </article>
-          ))}
-        </div>
+        {sessions.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-white/20 bg-white/5 p-4 text-sm text-slate-400">
+            Расписание пустое. Заполните таблицу upcoming_sessions в Supabase.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {sessions.map(session => (
+              <article
+                key={session.id}
+                className="rounded-2xl border border-white/10 bg-slate-900/60 p-4 text-white"
+              >
+                <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+                  <PlayCircle size={16} />
+                  {session.focus ?? 'Live'}
+                </div>
+                <h4 className="mt-3 text-lg font-semibold">{session.title}</h4>
+                <p className="text-sm text-slate-400">{session.mentor}</p>
+                <div className="mt-4 flex flex-wrap gap-3 text-sm text-slate-300">
+                  <span className="inline-flex items-center gap-2">
+                    <Clock3 size={16} />
+                    {session.start}
+                  </span>
+                  <span>{session.location}</span>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

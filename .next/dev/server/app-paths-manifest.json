@@ -1,6 +1,5 @@
 {
-  "/grades/page": "app/grades/page.js",
-  "/notes/page": "app/notes/page.js",
+  "/auth/sign-up-success/page": "app/auth/sign-up-success/page.js",
   "/page": "app/page.js",
-  "/schedule/page": "app/schedule/page.js"
+  "/profile/page": "app/profile/page.js"
 }

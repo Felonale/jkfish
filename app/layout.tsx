@@ -1,5 +1,4 @@
 import './globals.css';
-import styles from './styles/Layout.module.css';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import type { Metadata } from 'next';
@@ -20,12 +19,12 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
-      <body className={inter.className}>
-        <div className={styles.shell}>
+      <body className={`${inter.className} bg-slate-950 text-slate-100`}>
+        <div className="flex min-h-screen w-full">
           <Sidebar />
-          <div className={styles.contentRegion}>
+          <div className="flex flex-1 flex-col border-l border-white/10 bg-slate-950/90">
             <Header />
-            <main className={styles.main}>{children}</main>
+            <main className="w-full">{children}</main>
           </div>
         </div>
       </body>
