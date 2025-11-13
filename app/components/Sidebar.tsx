@@ -57,7 +57,7 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="hidden w-72 flex-col border-r border-white/10 bg-slate-950/95 px-5 py-8 text-white lg:flex">
+    <aside className="sticky top-0 hidden h-screen w-72 flex-col overflow-y-auto border-r border-white/10 bg-slate-950/95 px-5 py-8 text-white lg:flex">
       <div className="flex items-center gap-3 pb-8">
         <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 text-lg font-semibold">
           JK

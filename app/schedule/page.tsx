@@ -44,8 +44,8 @@ const weekSchedule = [
 ];
 
 const focusBlocks = [
-  { title: 'Deep Work', duration: '120 мин', description: 'Работа над финальным проектом.' },
-  { title: 'Mentor Hours', duration: '45 мин', description: 'Слот для вопросов по коду.' },
+  { title: 'Deep Work', time: '14:50', duration: '120 мин', description: 'Работа над финальным проектом.', location: 'Кампус · Аудитория А12' },
+  { title: 'Mentor Hours', time: '9:20', duration: '45 мин', description: 'Слот для вопросов по коду.', location: 'Кампус · Аудитория А12' },
 ];
 
 export default function SchedulePage() {
@@ -76,13 +76,13 @@ export default function SchedulePage() {
                   key={`${day.day}-${session.time}`}
                   className="rounded-2xl border border-white/5 bg-white/5 p-3"
                 >
-                  <div className="text-sm text-slate-400">{session.time}</div>
-                  <strong className="text-white">{session.subject}</strong>
-                  <span className="mt-1 inline-flex rounded-full border border-cyan-300/40 bg-cyan-300/10 px-2 py-0.5 text-xs text-cyan-100">
+                  <div className="justify-between text-sm text-slate-400 inline-flex w-full">
+                    <div className='flex w-full items-center'><Clock3 size={16} className='mr-1'/>{session.time}</div>
+                  <span className="inline-flex rounded-full border border-cyan-300/40 bg-cyan-300/10 px-2 py-0.5 text-xs text-cyan-100">
                     {session.type}
-                  </span>
+                  </span></div>
+                  <strong className="flex text-white w-full">{session.subject}</strong>
                   <div className="mt-2 inline-flex items-center gap-2 text-sm text-slate-400">
-                    <Clock3 size={16} />
                     {session.location}
                   </div>
                 </li>
@@ -101,9 +101,12 @@ export default function SchedulePage() {
             <div>
               <p className="text-sm text-emerald-200">{block.duration}</p>
               <h4 className="text-xl font-semibold">{block.title}</h4>
+              <div className="inline-flex items-center gap-2 text-sm text-emerald-100">
+                <MapPin size={16} />
+                {block.location}
+              </div>
             </div>
-            <div className="inline-flex items-center gap-2 text-sm text-emerald-100">
-              <MapPin size={16} />
+            <div className="mt-2 inline-flex items-center gap-2 text-sm text-slate-400">
               {block.description}
             </div>
           </div>

@@ -87,7 +87,7 @@ export default function GradesPage() {
               description={group.description}
               percent={group.percent}
               footer={group.updated}
-              highlight={group.percent > 90 ? "Dean's list" : 'В работе'}
+              highlight={group.percent > 90 ? "Almost" : 'In work'}
             />
           </Link>
         ))}

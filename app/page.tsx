@@ -111,45 +111,52 @@ export default async function HomePage() {
 
   return (
     <div className="space-y-10">
-      <section className="grid gap-6 rounded-[32px] border border-white/15 bg-white/5 p-8 shadow-2xl lg:grid-cols-[1.4fr_0.6fr]">
-        <div className="space-y-4 text-white">
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-300">
-            Командный образовательный поток
-          </p>
-          <h2 className="text-3xl font-semibold">
-            Учись гибко, получай аналитику и держи все данные в одном месте.
-          </h2>
-          <span className="block text-sm text-slate-300">
-            Поддерживаем Supabase Auth, таблицы прогресса и любые кастомные источники данных.
-            Запускайте платформу на Vercel без долгой подготовки.
-          </span>
-          <div className="flex flex-wrap gap-3">
-            <Link
-              href="/protected"
-              className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-2 text-sm font-semibold text-slate-900"
-            >
-              Начать спринт
-              <ArrowRight size={16} />
-            </Link>
-            <Link
-              href="/grades"
-              className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-2 text-sm font-semibold text-white"
-            >
-              Смотреть аналитику
-            </Link>
-          </div>
+      <section className="relative overflow-hidden rounded-[40px] border border-white/15 bg-gradient-to-br from-slate-900 via-slate-950 to-slate-900 p-8 text-white shadow-[0_40px_120px_rgba(2,6,23,0.6)]">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -top-20 right-0 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-60 w-60 rounded-full bg-violet-500/20 blur-3xl" />
         </div>
-
-        <div className="grid gap-3 rounded-3xl border border-white/10 bg-slate-950/70 p-4">
-          {heroStats.map(stat => (
-            <div key={stat.label} className="rounded-2xl border border-white/5 bg-white/5 p-4">
-              <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
-                {stat.label}
-              </span>
-              <strong className="mt-2 block text-2xl text-white">{stat.value}</strong>
-              <p className="text-sm text-slate-400">{stat.meta}</p>
+        <div className="relative grid gap-10 lg:grid-cols-[1.3fr_0.7fr]">
+          <div className="space-y-5">
+            <p className="text-xs uppercase tracking-[0.45em] text-slate-300">
+              Командный образовательный поток
+            </p>
+            <h2 className="max-w-2xl text-4xl font-semibold leading-tight">
+              Студенты получают аналитику и расписание в одной панели, а Supabase доставляет данные
+              в реальном времени.
+            </h2>
+            <span className="block max-w-3xl text-sm text-slate-300">
+              Дашборд адаптирован под гибридное обучение: синхронизируйте оценки, конспекты и
+              расписание из Supabase, чтобы фокусироваться на задачах, а не на переносе данных.
+            </span>
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/protected"
+                className="inline-flex items-center gap-2 rounded-full bg-white px-5 py-3 text-sm font-semibold text-slate-900 shadow-lg shadow-white/20"
+              >
+                Начать спринт
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                href="/grades"
+                className="inline-flex items-center gap-2 rounded-full border border-white/30 px-5 py-3 text-sm font-semibold text-white"
+              >
+                Смотреть аналитику
+              </Link>
             </div>
-          ))}
+          </div>
+
+          <div className="grid gap-4 rounded-3xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+            {heroStats.map(stat => (
+              <div key={stat.label} className="rounded-2xl border border-white/5 bg-slate-950/60 p-4">
+                <span className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                  {stat.label}
+                </span>
+                <strong className="mt-2 block text-3xl">{stat.value}</strong>
+                <p className="text-sm text-slate-400">{stat.meta}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 

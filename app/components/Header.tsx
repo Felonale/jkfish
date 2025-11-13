@@ -18,13 +18,13 @@ export default function Header() {
       <div className="flex flex-col gap-2 text-white">
         <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-violet-300">
           <Sparkles size={14} />
-          {today} · гибкое обучение без перегруза
+          {today} · гибкое обучение
         </p>
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-2xl font-semibold">JKFish Learning Hub</h1>
           <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100">
             <Wifi size={14} />
-            Supabase online
+            Service online
           </div>
         </div>
         <p className="max-w-3xl text-sm text-slate-400">
