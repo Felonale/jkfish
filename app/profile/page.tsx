@@ -8,14 +8,7 @@ import {
   MapPin,
   Phone,
   Sparkles,
-  Activity,
 } from 'lucide-react';
-import { ProfileForm } from './profile-form';
-
-const globalStats = [
-  { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
-  { label: 'Выполнено сегодня', value: '4 задачи', meta: '157 минут фокуса' },
-];
 
 const achievements = [
   { label: 'Средний балл', value: '4.8', meta: 'по ключевым модулям' },
@@ -59,7 +52,6 @@ export default async function ProfilePage() {
     track: user.user_metadata?.track ?? 'Fullstack + Data',
     location: user.user_metadata?.location ?? 'Алматы · гибрид',
     phone: user.user_metadata?.phone ?? '+7 (700) 000-00-00',
-    email: user.email ?? '',
   };
 
   return (
@@ -78,7 +70,7 @@ export default async function ProfilePage() {
         <div className="grid min-w-[220px] flex-1 grid-cols-1 gap-3 text-sm text-slate-100 sm:grid-cols-3">
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <Mail size={16} />
-            {profile.email}
+            {user.email}
           </div>
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <Phone size={16} />
@@ -90,33 +82,6 @@ export default async function ProfilePage() {
           </div>
         </div>
       </section>
-
-      <ProfileForm
-        initialData={{
-          name: profile.name,
-          email: profile.email,
-          phone: profile.phone,
-          location: profile.location,
-          cohort: profile.cohort,
-          track: profile.track,
-        }}
-      />
-
-      <div className="flex flex-wrap gap-3">
-        {globalStats.map(stat => (
-          <article
-            key={stat.label}
-            className="min-w-[150px] flex-1 rounded-2xl border border-white/10 bg-slate-900/70 px-4 py-3"
-          >
-            <span className="text-xs uppercase tracking-[0.2em] text-slate-400">{stat.label}</span>
-            <strong className="mt-1 block text-lg text-white">{stat.value}</strong>
-            <div className="mt-1 inline-flex items-center gap-2 text-sm text-slate-500">
-              <Activity size={14} />
-              {stat.meta}
-            </div>
-          </article>
-        ))}
-      </div>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         {achievements.map(item => (

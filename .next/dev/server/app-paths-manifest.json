@@ -1,11 +1,4 @@
 {
-<<<<<<< HEAD
-  "/notes/new/page": "app/notes/new/page.js",
-  "/notes/page": "app/notes/page.js"
-=======
-  "/api/profile/route": "app/api/profile/route.js",
   "/page": "app/page.js",
-  "/profile/page": "app/profile/page.js",
-  "/protected/page": "app/protected/page.js"
->>>>>>> d089703c3157395f81dfd3b66a904f0d2e86ef41
+  "/schedule/page": "app/schedule/page.js"
 }
