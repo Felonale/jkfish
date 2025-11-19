@@ -1,6 +1,12 @@
 {
+<<<<<<< HEAD
   "/_not-found/page": "app/_not-found/page.js",
   "/notes/new/page": "app/notes/new/page.js",
   "/notes/page": "app/notes/page.js",
+=======
+  "/notes/page": "app/notes/page.js",
+  "/page": "app/page.js",
+  "/profile/page": "app/profile/page.js",
+>>>>>>> 5ab117dca8d64862cddee8c3ba729868f0b7b64d
   "/schedule/page": "app/schedule/page.js"
 }

@@ -5,11 +5,6 @@ import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
-const quickStats = [
-  { label: 'Активные курсы', value: '6', meta: '78% - средний прогресс' },
-  { label: 'Прогресс сегодня', value: '4 задачи', meta: '157 минут бесперерывно         ' },
-];
-
 export default function LoginPage() {
   const supabase = createClient();
   const [email, setEmail] = useState('');
