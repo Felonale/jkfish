@@ -57,18 +57,51 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-1/6 flex-col overflow-y-auto border-r border-white/10 bg-slate-950/95 px-5 py-8 text-white lg:flex">
+    <aside
+      className="
+        group/sidebar
+        sticky top-0
+        hidden lg:flex
+        h-screen
+        w-16 hover:w-64
+        flex-col
+        border-r border-white/10
+        bg-slate-950/95
+        px-3 py-8
+        text-white
+        transition-[width] duration-300 ease-in-out
+      "
+    >
       <div className="flex items-center gap-3 pb-8">
-        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 text-lg font-semibold">
+        <div className="
+          flex h-10 min-w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500
+          to-cyan-400 text-lg font-semibold select-none
+          ">
           JK
         </div>
-        <div>
+        <div
+          className="
+            whitespace-nowrap
+            opacity-0 -translate-x-2
+            group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
+            transition-all duration-200
+          "
+        >
           <strong className="block text-lg">JKFish Academy</strong>
         </div>
       </div>
 
       <nav className="flex-1">
-        <p className="text-xs uppercase tracking-[0.3em] text-slate-500">Навигация</p>
+        <p
+          className="
+            text-xs uppercase tracking-[0.3em] text-slate-500
+            opacity-0 -translate-x-2
+            group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
+            transition-all duration-200
+          "
+        >
+          Навигация
+        </p>
         <ul className="mt-4 space-y-2">
           {itemsToRender.map(item => {
             const Icon = item.icon;
@@ -78,14 +111,30 @@ export default function Sidebar() {
               <li key={item.href}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 rounded-xl border border-transparent px-3 py-2 text-sm transition ${
-                    isActive
-                      ? 'border-violet-400/40 bg-violet-400/10 text-white'
-                      : 'text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white'
-                  }`}
+                  className={`
+                    flex items-center gap-3
+                    rounded-xl border border-transparent
+                    px-2.5 py-2
+                    text-sm
+                    transition
+                    ${
+                      isActive
+                        ? 'border-violet-400/40 bg-violet-400/10 text-white'
+                        : 'text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white'
+                    }
+                  `}
                 >
-                  <Icon size={18} />
-                  {item.label}
+                  <Icon size={18} className="shrink-0" />
+                  <span
+                    className="
+                      whitespace-nowrap
+                      opacity-0 -translate-x-2
+                      group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
+                      transition-all duration-200
+                    "
+                  >
+                    {item.label}
+                  </span>
                 </Link>
               </li>
             );

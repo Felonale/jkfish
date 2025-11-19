@@ -10,7 +10,6 @@ import {
   Sparkles,
   Activity,
 } from 'lucide-react';
-import { ProfileForm } from './profile-form';
 
 const globalStats = [
   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
@@ -75,7 +74,7 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid min-w-[220px] flex-1 grid-cols-1 gap-3 text-sm text-slate-100 sm:grid-cols-3">
+        <div className="grid min-w-fit max-w-80 flex-1 grid-rows-1 gap-3 text-sm text-slate-100 sm:grid-rows-3">
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <Mail size={16} />
             {profile.email}
@@ -89,18 +88,17 @@ export default async function ProfilePage() {
             {profile.location}
           </div>
         </div>
-      </section>
 
-      <ProfileForm
-        initialData={{
-          name: profile.name,
-          email: profile.email,
-          phone: profile.phone,
-          location: profile.location,
-          cohort: profile.cohort,
-          track: profile.track,
-        }}
-      />
+        <div className="w-full">
+          <Link
+            href="/profile/edit"
+            className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
+          >
+            Редактировать профиль
+            <ArrowRight size={16} />
+          </Link>
+        </div>
+      </section>
 
       <div className="flex flex-wrap gap-3">
         {globalStats.map(stat => (

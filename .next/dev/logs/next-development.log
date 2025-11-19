@@ -1,280 +1,179 @@
-<<<<<<< HEAD
-[00:00:01.451] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:01.635] Server  LOG      ✓ Ready in 1252ms
-[00:00:05.293] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:10.598] Browser ERROR   Ошибка при сохранении: {"code":"42501","details":null,"hint":null,"message":"new row violates row-level security policy for table \"notes\"","raw":{"code":"42501","details":null,"hint":null,"message":"new row violates row-level security policy for table \"notes\""}}
-[00:21:24.961] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:24:26.613] Server  LOG      ✓ Compiled in 175ms
-=======
-[00:00:01.666] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:01.866] Server  LOG      ✓ Ready in 1403ms
-[00:00:05.782] Server  LOG      ○ Compiling / ...
-[00:00:09.686] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:13.888] Server  LOG      ✓ Compiled in 42ms
-[00:00:38.576] Server  LOG      ✓ Compiled in 41ms
-[00:00:43.233] Server  LOG      ✓ Compiled in 35ms
-[00:00:46.301] Server  LOG      ✓ Compiled in 28ms
-[00:02:00.123] Server  LOG      ✓ Compiled in 49ms
-[00:02:16.791] Server  LOG      ✓ Compiled in 42ms
-[00:02:56.681] Server  LOG      ✓ Compiled in 36ms
-[00:02:59.084] Server  LOG      ✓ Compiled in 29ms
-[00:03:14.092] Server  LOG      ✓ Compiled in 53ms
-[00:03:16.051] Server  LOG      ✓ Compiled in 23ms
-[00:03:18.702] Server  LOG      ✓ Compiled in 40ms
-[00:03:20.536] Server  LOG      ✓ Compiled in 36ms
-[00:03:20.955] Server  LOG      ✓ Compiled in 30ms
-[00:04:15.754] Server  LOG      ✓ Compiled in 47ms
-[00:04:22.648] Server  LOG      ✓ Compiled in 26ms
-[00:04:29.456] Server  LOG      ✓ Compiled in 25ms
-[00:04:42.894] Server  LOG      ✓ Compiled in 30ms
-[00:04:46.891] Server  LOG      ✓ Compiled in 25ms
-[00:04:51.704] Server  LOG      ✓ Compiled in 24ms
-[00:06:01.493] Server  LOG      ✓ Compiled in 34ms
-[00:06:05.880] Server  LOG      ✓ Compiled in 27ms
-[00:06:35.020] Server  LOG      ✓ Compiled in 27ms
-[00:07:29.555] Server  LOG      ✓ Compiled in 30ms
-[00:07:29.959] Server  ERROR    ⨯ ReferenceError: CalendarDays is not defined
-[00:07:30.457] Browser ERROR   uncaughtError: ReferenceError: CalendarDays is not defined
-[00:07:30.772] Server  LOG      ✓ Compiled in 28ms
-[00:07:31.971] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:09:12.165] Server  LOG      ✓ Compiled in 35ms
-[00:09:26.798] Server  LOG      ✓ Compiled in 23ms
-[00:10:14.720] Server  LOG      ✓ Compiled in 31ms
-[00:10:39.115] Server  LOG      ✓ Compiled in 34ms
-[00:11:08.386] Server  LOG      ✓ Compiled in 47ms
-[00:11:16.722] Server  LOG      ✓ Compiled in 27ms
-[00:11:36.353] Server  LOG      ✓ Compiled in 38ms
-[00:11:44.798] Server  LOG      ✓ Compiled in 46ms
-[00:12:15.184] Server  LOG      ✓ Compiled in 65ms
-[00:12:28.972] Server  LOG      ✓ Compiled in 37ms
-[00:13:02.752] Server  LOG      ✓ Compiled in 67ms
-[00:13:27.852] Server  LOG      ✓ Compiled in 50ms
-[00:13:41.262] Server  LOG      ✓ Compiled in 51ms
-[00:14:00.913] Server  LOG      ✓ Compiled in 49ms
-[00:27:27.137] Server  LOG      ✓ Compiled in 32ms
-[00:31:19.722] Server  LOG      ✓ Compiled in 28ms
-[00:31:40.088] Server  LOG      ✓ Compiled in 86ms
-[00:31:58.654] Server  LOG      ✓ Compiled in 94ms
-[00:32:00.234] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:35:28.957] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:37:12.337] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:38:18.131] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:39:01.414] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:39:10.512] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
->>>>>>> d089703c3157395f81dfd3b66a904f0d2e86ef41
-[01:23:58.971] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:23:58.987] Server  LOG      ✓ Compiled in 903ms
-[01:24:00.309] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:00.694] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:00.740] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:00.759] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:01.036] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:01.076] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:01.095] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:01.136] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:01.152] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:01.520] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:01.595] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:01.637] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:01.681] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:01.698] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:01.953] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:01.996] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.016] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:02.058] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.073] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.367] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:02.407] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.433] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:02.469] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.484] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.738] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:02.776] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.800] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:02.836] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:02.852] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.162] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:03.201] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.225] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:03.260] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.275] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.539] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:03.575] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.599] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:03.635] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.651] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.920] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:03.960] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:03.987] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:04.023] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:04.038] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:04.296] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:04.334] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:04.360] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:04.394] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:04.410] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:04.726] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:04.763] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:04.788] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:04.823] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:04.838] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.110] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:05.148] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.175] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:05.210] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.225] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.545] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:05.585] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.613] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:05.652] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.669] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.922] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:05.958] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:05.985] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:06.024] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:06.041] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:06.337] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:06.374] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:06.399] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:06.433] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:06.448] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:06.702] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:06.739] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:06.766] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:06.804] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:06.820] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:07.117] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:07.155] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:07.180] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:07.217] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:07.232] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:07.494] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:07.533] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:07.560] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:07.598] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:07.614] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:07.951] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:07.988] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.012] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:08.047] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.061] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.320] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:08.359] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.384] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:08.424] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.439] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.720] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:08.760] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.786] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:08.821] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:08.837] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:09.089] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:09.125] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:09.150] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:09.185] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:09.201] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:09.481] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:09.519] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:09.546] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:09.580] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:09.596] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:09.977] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:10.016] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.039] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:10.072] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.089] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.406] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:10.445] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.472] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:10.507] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.524] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.780] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:10.818] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.845] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:10.884] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:10.899] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:11.170] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:11.206] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:11.234] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:11.269] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:11.286] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:11.557] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:11.593] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:11.621] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:11.658] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:11.674] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:11.981] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:12.016] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.042] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:12.079] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.093] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.346] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:12.381] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.407] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:12.442] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.457] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.732] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:12.766] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.791] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:12.823] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:12.837] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.087] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:13.125] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.150] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:13.186] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.202] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.471] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:13.511] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.537] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:13.573] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.590] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.842] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:13.884] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.911] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:13.948] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:13.966] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:14.238] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:14.278] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:14.305] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:14.342] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:14.359] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:14.607] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:14.647] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:14.673] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:14.710] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:14.726] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:14.991] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:15.029] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.054] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:15.089] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.105] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.349] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:15.386] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.411] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:15.467] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.481] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.772] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:15.811] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.839] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:15.875] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:15.890] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:16.145] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:16.183] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:16.213] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:16.247] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:16.261] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:16.608] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:16.645] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:16.671] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:16.707] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:16.721] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:16.994] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:17.034] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:17.061] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:17.093] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:17.107] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:17.435] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:17.475] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:17.500] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 3 (line 2 column 1)
-[01:24:17.533] Server  ERROR    ⨯ SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
-[01:24:17.548] Server  ERROR   SyntaxError: Expected property name or '}' in JSON at position 102 (line 7 column 1)
+[00:00:01.148] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[00:00:01.294] Server  LOG      ✓ Ready in 990ms
+[00:00:26.361] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:04:38.486] Server  LOG      ✓ Compiled in 70ms
+[00:05:43.514] Server  LOG      ✓ Compiled in 43ms
+[00:05:46.738] Server  LOG      ✓ Compiled in 35ms
+[00:10:27.067] Server  LOG      ✓ Compiled in 60ms
+[00:11:00.668] Server  LOG      ✓ Compiled in 58ms
+[00:11:05.288] Server  LOG      ✓ Compiled in 31ms
+[00:12:13.831] Server  LOG      ✓ Compiled in 31ms
+[00:12:39.203] Server  LOG      ✓ Compiled in 40ms
+[00:13:43.545] Server  LOG      ✓ Compiled in 39ms
+[00:13:57.078] Server  LOG      ✓ Compiled in 34ms
+[00:14:24.488] Server  LOG      ✓ Compiled in 49ms
+[00:14:32.442] Server  LOG      ✓ Compiled in 28ms
+[00:15:52.487] Server  LOG      ✓ Compiled in 34ms
+[00:16:04.650] Server  LOG      ✓ Compiled in 34ms
+[00:16:37.491] Server  LOG      ✓ Compiled in 45ms
+[00:16:53.351] Server  LOG      ✓ Compiled in 32ms
+[00:17:03.467] Server  LOG      ✓ Compiled in 33ms
+[00:19:04.999] Server  LOG      ✓ Compiled in 56ms
+[00:19:08.631] Server  LOG      ✓ Compiled in 27ms
+[00:19:17.700] Server  LOG      ✓ Compiled in 29ms
+[00:19:20.614] Server  LOG      ✓ Compiled in 28ms
+[00:19:26.530] Server  LOG      ✓ Compiled in 27ms
+[00:19:29.334] Server  LOG      ✓ Compiled in 32ms
+[00:19:31.260] Server  LOG      ✓ Compiled in 28ms
+[00:19:37.770] Server  LOG      ✓ Compiled in 28ms
+[00:19:42.940] Server  LOG      ✓ Compiled in 28ms
+[00:19:45.334] Server  LOG      ✓ Compiled in 28ms
+[00:20:17.363] Server  LOG      ✓ Compiled in 39ms
+[00:20:41.262] Server  LOG      ✓ Compiled in 52ms
+[00:20:51.759] Server  LOG      ✓ Compiled in 49ms
+[00:20:55.204] Server  LOG      ✓ Compiled in 25ms
+[00:21:07.846] Server  LOG      ✓ Compiled in 53ms
+[00:21:14.949] Server  LOG      ✓ Compiled in 28ms
+[00:21:18.081] Server  LOG      ✓ Compiled in 29ms
+[00:22:18.388] Server  LOG      ✓ Compiled in 38ms
+[00:22:24.394] Server  LOG      ✓ Compiled in 29ms
+[00:22:28.215] Server  LOG      ✓ Compiled in 50ms
+[00:22:30.112] Server  LOG      ✓ Compiled in 33ms
+[00:22:31.669] Server  LOG      ✓ Compiled in 36ms
+[00:22:33.768] Server  LOG      ✓ Compiled in 26ms
+[00:22:43.599] Server  LOG      ✓ Compiled in 33ms
+[00:22:47.837] Server  LOG      ✓ Compiled in 28ms
+[00:23:29.606] Server  LOG      ✓ Compiled in 36ms
+[00:23:33.554] Server  LOG      ✓ Compiled in 28ms
+[00:23:35.176] Server  LOG      ✓ Compiled in 28ms
+[00:23:38.938] Server  LOG      ✓ Compiled in 33ms
+[00:23:43.506] Server  LOG      ✓ Compiled in 25ms
+[00:23:45.837] Server  LOG      ✓ Compiled in 24ms
+[00:24:15.075] Server  LOG      ✓ Compiled in 41ms
+[00:24:16.304] Server  LOG      ✓ Compiled in 29ms
+[00:27:44.903] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:30:11.080] Server  ERROR    ⨯ ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:30:11.082] Server  ERROR    ⨯ ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:30:11.085] Server  ERROR    ⨯ ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:30:11.086] Server  ERROR    ⨯ ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+[00:30:11.915] Browser ERROR   ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+https://nextjs.org/docs/messages/module-not-found
+[00:30:34.915] Browser ERROR   ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+https://nextjs.org/docs/messages/module-not-found
+[00:30:56.916] Browser ERROR   ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+https://nextjs.org/docs/messages/module-not-found
+[00:31:19.909] Browser ERROR   ./app/profile/page.tsx:13:1
+Module not found: Can't resolve './profile-form'
+  11 |   Activity,
+  12 | } from 'lucide-react';
+> 13 | import { ProfileForm } from './profile-form';
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  14 |
+  15 | const globalStats = [
+  16 |   { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+
+https://nextjs.org/docs/messages/module-not-found
+[00:31:34.171] Server  LOG      ✓ Compiled in 55ms
+[00:35:17.182] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:35:21.331] Server  LOG      ✓ Compiled in 66ms
+[00:35:39.072] Server  LOG      ✓ Compiled in 53ms
+[00:40:53.308] Server  LOG      ✓ Compiled in 49ms
+[00:40:59.906] Server  LOG      ✓ Compiled in 35ms
+[00:41:03.820] Server  LOG      ✓ Compiled in 28ms
+[00:42:03.951] Server  LOG      ✓ Compiled in 78ms
+[00:42:07.762] Server  LOG      ✓ Compiled in 31ms
+[00:42:10.325] Server  LOG      ✓ Compiled in 29ms
+[00:42:18.622] Server  LOG      ✓ Compiled in 33ms
+[00:42:26.660] Server  LOG      ✓ Compiled in 36ms
+[00:42:34.152] Server  LOG      ✓ Compiled in 35ms
+[00:42:47.937] Server  LOG      ✓ Compiled in 46ms
+[00:43:01.472] Server  LOG      ✓ Compiled in 45ms
+[00:43:06.293] Server  LOG      ✓ Compiled in 45ms
+[00:43:15.127] Server  LOG      ✓ Compiled in 36ms
+[00:43:30.600] Server  LOG      ✓ Compiled in 48ms
+[00:43:34.823] Server  LOG      ✓ Compiled in 34ms
+[00:43:44.449] Server  LOG      ✓ Compiled in 40ms
+[00:43:48.442] Server  LOG      ✓ Compiled in 44ms
