@@ -1,6 +1,64 @@
+<<<<<<< HEAD
 [00:00:01.451] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
 [00:00:01.635] Server  LOG      ✓ Ready in 1252ms
 [00:00:05.293] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [00:00:10.598] Browser ERROR   Ошибка при сохранении: {"code":"42501","details":null,"hint":null,"message":"new row violates row-level security policy for table \"notes\"","raw":{"code":"42501","details":null,"hint":null,"message":"new row violates row-level security policy for table \"notes\""}}
 [00:21:24.961] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
 [00:24:26.613] Server  LOG      ✓ Compiled in 175ms
+=======
+[00:00:01.666] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[00:00:01.866] Server  LOG      ✓ Ready in 1403ms
+[00:00:05.782] Server  LOG      ○ Compiling / ...
+[00:00:09.686] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:13.888] Server  LOG      ✓ Compiled in 42ms
+[00:00:38.576] Server  LOG      ✓ Compiled in 41ms
+[00:00:43.233] Server  LOG      ✓ Compiled in 35ms
+[00:00:46.301] Server  LOG      ✓ Compiled in 28ms
+[00:02:00.123] Server  LOG      ✓ Compiled in 49ms
+[00:02:16.791] Server  LOG      ✓ Compiled in 42ms
+[00:02:56.681] Server  LOG      ✓ Compiled in 36ms
+[00:02:59.084] Server  LOG      ✓ Compiled in 29ms
+[00:03:14.092] Server  LOG      ✓ Compiled in 53ms
+[00:03:16.051] Server  LOG      ✓ Compiled in 23ms
+[00:03:18.702] Server  LOG      ✓ Compiled in 40ms
+[00:03:20.536] Server  LOG      ✓ Compiled in 36ms
+[00:03:20.955] Server  LOG      ✓ Compiled in 30ms
+[00:04:15.754] Server  LOG      ✓ Compiled in 47ms
+[00:04:22.648] Server  LOG      ✓ Compiled in 26ms
+[00:04:29.456] Server  LOG      ✓ Compiled in 25ms
+[00:04:42.894] Server  LOG      ✓ Compiled in 30ms
+[00:04:46.891] Server  LOG      ✓ Compiled in 25ms
+[00:04:51.704] Server  LOG      ✓ Compiled in 24ms
+[00:06:01.493] Server  LOG      ✓ Compiled in 34ms
+[00:06:05.880] Server  LOG      ✓ Compiled in 27ms
+[00:06:35.020] Server  LOG      ✓ Compiled in 27ms
+[00:07:29.555] Server  LOG      ✓ Compiled in 30ms
+[00:07:29.959] Server  ERROR    ⨯ ReferenceError: CalendarDays is not defined
+[00:07:30.457] Browser ERROR   uncaughtError: ReferenceError: CalendarDays is not defined
+[00:07:30.772] Server  LOG      ✓ Compiled in 28ms
+[00:07:31.971] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:12.165] Server  LOG      ✓ Compiled in 35ms
+[00:09:26.798] Server  LOG      ✓ Compiled in 23ms
+[00:10:14.720] Server  LOG      ✓ Compiled in 31ms
+[00:10:39.115] Server  LOG      ✓ Compiled in 34ms
+[00:11:08.386] Server  LOG      ✓ Compiled in 47ms
+[00:11:16.722] Server  LOG      ✓ Compiled in 27ms
+[00:11:36.353] Server  LOG      ✓ Compiled in 38ms
+[00:11:44.798] Server  LOG      ✓ Compiled in 46ms
+[00:12:15.184] Server  LOG      ✓ Compiled in 65ms
+[00:12:28.972] Server  LOG      ✓ Compiled in 37ms
+[00:13:02.752] Server  LOG      ✓ Compiled in 67ms
+[00:13:27.852] Server  LOG      ✓ Compiled in 50ms
+[00:13:41.262] Server  LOG      ✓ Compiled in 51ms
+[00:14:00.913] Server  LOG      ✓ Compiled in 49ms
+[00:27:27.137] Server  LOG      ✓ Compiled in 32ms
+[00:31:19.722] Server  LOG      ✓ Compiled in 28ms
+[00:31:40.088] Server  LOG      ✓ Compiled in 86ms
+[00:31:58.654] Server  LOG      ✓ Compiled in 94ms
+[00:32:00.234] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:35:28.957] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:37:12.337] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:38:18.131] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:39:01.414] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:39:10.512] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+>>>>>>> d089703c3157395f81dfd3b66a904f0d2e86ef41
