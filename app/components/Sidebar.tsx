@@ -142,20 +142,6 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
-
-      <div className="rounded-2xl border border-violet-300/40 bg-violet-500/10 p-4 text-sm text-violet-50">
-        <p className="font-semibold text-white">Подключите новые курсы</p>
-        <span className="mt-1 block text-violet-100/80">
-          Данные подтянутся из Supabase в один клик.
-        </span>
-        <Link
-          href={isAuthed ? '/protected' : '/login'}
-          className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-3 py-2 text-sm font-semibold text-white"
-        >
-          <BookOpenCheck size={18} />
-          {isAuthed ? 'Добавить курс' : 'Войти, чтобы добавить'}
-        </Link>
-      </div>
     </aside>
   );
 }
