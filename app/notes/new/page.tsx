@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 export default function NewNotePage() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [tags, setTags] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const router = useRouter();
   const supabase = createClient();
@@ -15,9 +16,15 @@ export default function NewNotePage() {
     e.preventDefault();
     setErrorMsg('');
 
+    const tagArray = tags
+      .split(',')
+      .map(tag => tag.trim())
+      .filter(tag => tag.length > 0);
+
     const { data, error, status } = await supabase.from('notes').insert({
       title: title.trim(),
       content: content.trim() || null,
+      tags: tagArray.length > 0 ? tagArray : null,
     });
 
     if (error) {
@@ -54,6 +61,14 @@ export default function NewNotePage() {
           value={content}
           onChange={e => setContent(e.target.value)}
           className="w-full h-40 rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400 resize-none"
+        />
+
+        <input
+          type="text"
+          placeholder="Теги (через запятую)"
+          value={tags}
+          onChange={e => setTags(e.target.value)}
+          className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400"
         />
 
         {errorMsg && <p className="text-sm text-red-400">{errorMsg}</p>}
