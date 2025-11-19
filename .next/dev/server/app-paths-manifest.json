@@ -1,10 +1,4 @@
 {
-  "/_not-found/page": "app/_not-found/page.js",
-  "/auth/sign-up-success/page": "app/auth/sign-up-success/page.js",
-  "/grades/[subject]/page": "app/grades/[subject]/page.js",
-  "/grades/page": "app/grades/page.js",
-  "/notes/page": "app/notes/page.js",
-  "/page": "app/page.js",
-  "/profile/page": "app/profile/page.js",
-  "/schedule/page": "app/schedule/page.js"
+  "/notes/new/page": "app/notes/new/page.js",
+  "/notes/page": "app/notes/page.js"
 }
