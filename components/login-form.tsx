@@ -38,8 +38,31 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected");
+
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData?.user;
+      const studentInn = user?.user_metadata?.student_inn;
+
+      let studentExists = false;
+
+      if (studentInn) {
+        const { data: studentRows, error: studentError } = await supabase
+          .from("students")
+          .select("INN")
+          .eq("INN", studentInn)
+          .limit(1);
+
+        if (!studentError && studentRows && studentRows.length > 0) {
+          studentExists = true;
+        }
+      }
+
+      if (!studentInn || !studentExists) {
+        router.push("/profile/onboarding");
+        return;
+      }
+
+      router.push("/profile");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

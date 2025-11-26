@@ -14,6 +14,7 @@ import {
   User2,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { LogoutButton } from '@/components/logout-button';
 
 type NavItem = {
   href: string;
@@ -29,7 +30,7 @@ const navItems: NavItem[] = [
   { href: '/schedule', label: 'Расписание', icon: CalendarClock, requiresAuth: true },
   { href: '/notes', label: 'Конспекты', icon: NotebookPen, requiresAuth: true },
   { href: '/profile', label: 'Профиль', icon: User2, requiresAuth: true },
-  { href: '/login', label: 'Войти', icon: LogIn, hideWhenAuthed: true },
+  { href: '/auth/login', label: 'Войти', icon: LogIn, hideWhenAuthed: true },
 ];
 
 export default function Sidebar() {
@@ -142,6 +143,18 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
+
+      {isAuthed && (
+        <div
+          className="
+            mt-4
+            opacity-0 group-hover/sidebar:opacity-100
+            transition-all duration-200
+          "
+        >
+          <LogoutButton />
+        </div>
+      )}
     </aside>
   );
 }

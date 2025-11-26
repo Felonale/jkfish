@@ -2,6 +2,7 @@
 
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 type ProfileFormProps = {
   initialData: {
@@ -15,6 +16,7 @@ type ProfileFormProps = {
 };
 
 export function ProfileForm({ initialData }: ProfileFormProps) {
+  const router = useRouter();
   const [form, setForm] = useState(initialData);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
@@ -28,25 +30,28 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     setPending(true);
     setMessage(null);
 
-    try {
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
+try {
+  const response = await fetch('/api/profile', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(form),
+  });
 
-      const payload = await response.json();
+  const payload = await response.json();
 
-      if (!response.ok) {
-        throw new Error(payload.error ?? 'Не удалось обновить профиль');
-      }
+  if (!response.ok) {
+    throw new Error(payload.error ?? 'Не удалось обновить профиль');
+  }
 
-      setMessage('Профиль обновлён. Обновите страницу, чтобы увидеть изменения.');
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : 'Что-то пошло не так');
-    } finally {
-      setPending(false);
-    }
+  setMessage('Профиль обновлён');
+  router.push('/profile');
+  // или router.replace('/profile');
+} catch (error) {
+  setMessage(error instanceof Error ? error.message : 'Что-то пошло не так');
+} finally {
+  setPending(false);
+}
+
   };
 
   return (
@@ -55,7 +60,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
         <div>
           <h2 className="text-2xl font-semibold">Редактирование профиля</h2>
           <p className="text-sm text-slate-400">
-            Измените контактные данные. Изменение email может потребовать подтверждения Supabase.
+            Измените контактные данные. Изменение email потребует подтверждения.
           </p>
         </div>
       </div>

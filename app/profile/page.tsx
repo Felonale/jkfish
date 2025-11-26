@@ -1,25 +1,25 @@
 import Link from 'next/link';
-import { Activity } from "lucide-react";
 import { createClient } from '@/lib/supabase/server';
 import {
   ArrowRight,
-  BadgeCheck,
+  Activity,
   CalendarClock,
   Mail,
   MapPin,
   Phone,
   Sparkles,
+  IdCard,
 } from 'lucide-react';
 
 const globalStats = [
-  { label: 'Активные курсы', value: '6', meta: '78% средний прогресс' },
+  { label: 'Средний балл', value: '85', meta: 'за всё время' },
   { label: 'Выполнено сегодня', value: '4 задачи', meta: '157 минут фокуса' },
 ];
 
 const achievements = [
-  { label: 'Средний балл', value: '4.8', meta: 'по ключевым модулям' },
-  { label: 'Фокус-время', value: '18 ч', meta: 'за текущую неделю' },
-  { label: 'Проектов', value: '3', meta: 'в стадии review' },
+  { label: 'Средний балл', value: '79', meta: 'за текущую неделю' },
+  { label: 'Посещаемость', value: '80%', meta: 'за текущую неделю' },
+  { label: 'Открытые задания', value: '3', meta: '' },
 ];
 
 const timeline = [
@@ -35,7 +35,8 @@ export default async function ProfilePage() {
 
   if (!user) {
     return (
-      <section className="mx-auto mt-16 flex max-w-xl flex-col items-center gap-4 rounded-3xl border border-white/15 bg-white/5 p-8 text-center text-slate-100">
+      <section className="mx-auto mt-16 flex max-w-xl flex-col items-center gap-4 rounded-3xl
+          border border-white/15 bg-white/5 p-8 text-center text-slate-100">
         <Sparkles size={28} className="text-indigo-300" />
         <h2 className="text-2xl font-semibold text-white">Войдите, чтобы увидеть профиль</h2>
         <p className="text-sm text-slate-400">
@@ -66,11 +67,28 @@ export default async function ProfilePage() {
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.35em] text-slate-300">Профиль студента</p>
           <h1 className="text-4xl font-semibold text-white">{profile.name}</h1>
-          <span className="text-slate-300">{profile.track}</span>
-          <div className="inline-flex items-center gap-2 rounded-full border border-cyan-300/40 bg-cyan-300/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-cyan-100">
-            <BadgeCheck size={16} />
-            {profile.cohort}
+          <div className='flex gap-3'>
+            <div className='w-max self-center'>
+              <IdCard className='text-slate-200' size={26} />
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-2 rounded-full py-1 text-sm font-semibold uppercase tracking-[0.1em] text-slate-300">
+                {profile.cohort}
+              </div>
+              <div className="text-slate-300">{profile.track}</div>
+            </div>
           </div>
+
+          <div className="w-full">
+            <Link
+              href="/profile/edit"
+              className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
+            >
+              Редактировать профиль
+              <ArrowRight size={16} />
+            </Link>
+          </div>
+
         </div>
 
         <div className="grid min-w-fit max-w-80 flex-1 grid-rows-1 gap-3 text-sm text-slate-100 sm:grid-rows-3">
@@ -87,16 +105,6 @@ export default async function ProfilePage() {
             {profile.location}
           </div>
         </div>
-
-        <div className="w-full">
-          <Link
-            href="/profile/edit"
-            className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
-          >
-            Редактировать профиль
-            <ArrowRight size={16} />
-          </Link>
-        </div>
       </section>
 
       <div className="flex flex-wrap gap-3">
@@ -107,10 +115,7 @@ export default async function ProfilePage() {
           >
             <span className="text-xs uppercase tracking-[0.2em] text-slate-400">{stat.label}</span>
             <strong className="mt-1 block text-lg text-white">{stat.value}</strong>
-            <div className="mt-1 inline-flex items-center gap-2 text-sm text-slate-500">
-              <Activity size={14} />
-              {stat.meta}
-            </div>
+            <div className="mt-1 inline-flex items-center gap-2 text-sm text-slate-500">{stat.meta}</div>
           </article>
         ))}
       </div>
