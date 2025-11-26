@@ -14,7 +14,46 @@ const weekOrder = [
 ];
 
 const initialWeekSchedule = [
-  
+  {
+    day: 'Понедельник',
+    sessions: [
+      {
+        time: '09:00',
+        subject: 'Алгоритмы · лайв-решения',
+        type: 'Лекция',
+        location: 'Кампус · Аудитория C1',
+      },
+      {
+        time: '13:00',
+        subject: 'Проектное окно',
+        type: 'Фокус',
+        location: 'Miro board',
+      },
+    ],
+  },
+  {
+    day: 'Вторник',
+    sessions: [
+      {
+        time: '11:00',
+        subject: 'Математический практикум',
+        type: 'Семинар',
+        location: 'Zoom · Поток S',
+      },
+    ],
+  },
+  {
+    day: 'Среда',
+    sessions: [
+      { time: '10:30', subject: 'Product review', type: 'Sync', location: 'Notion doc' },
+      {
+        time: '15:00',
+        subject: 'Supabase Edge Functions',
+        type: 'Workshop',
+        location: 'Online lab',
+      },
+    ],
+  },
 ];
 
 export default function SchedulePage() {
