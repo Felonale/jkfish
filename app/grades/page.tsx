@@ -1,6 +1,10 @@
+"use client";
+
 import Link from 'next/link';
-import { ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Card from '../components/Card';
+import { useRef } from 'react';
+import { motion } from "framer-motion";
 
 const gradeGroups = [
   {
@@ -27,6 +31,14 @@ const gradeGroups = [
     description: 'Проект на Next.js + Drizzle уходит в code review.',
     updated: 'Вчера · 22:18',
   },
+  {
+    id: 'Операционные системы',
+    subject: 'Системное программирование',
+    grade: 'B-',
+    percent: 85,
+    description: 'Сделать на виндовс несколько дерикторий и присвоить им разные статусы разрешения.',
+    updated: 'Обновлено · 15:00',
+  },
 ];
 
 const breakdownRows = [
@@ -49,6 +61,15 @@ const breakdownRows = [
 ];
 
 export default function GradesPage() {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({
+        left: direction === "right" ? 300 : -300,
+        behavior: "smooth",
+      });
+    }
+  };
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
@@ -72,25 +93,46 @@ export default function GradesPage() {
             Экспорт отчёта
           </Link>
         </div>
-      </header>
-
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {gradeGroups.map(group => (
-          <Link
-            key={group.id}
-            href={`/grades/${group.id}`}
-            className="block rounded-3xl border border-transparent transition hover:-translate-y-1 hover:border-white/20"
-          >
-            <Card
-              eyebrow={`Текущая оценка: ${group.grade}`}
-              title={group.subject}
-              description={group.description}
-              percent={group.percent}
-              footer={group.updated}
-              highlight={group.percent > 90 ? "Almost" : 'In work'}
-            />
-          </Link>
-        ))}
+      </header>  
+      
+      <div className="relative">
+        <button
+          onClick={() => scroll("left")}
+          className="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-700 text-white px-3 py-2 rounded z-10"
+        ><ArrowLeft/></button>
+        <div
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto items-end pb-4 px-20 scrollbar-hide h-[300px] scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {gradeGroups.map(group => (
+            <motion.div
+              key={group.id}
+              initial={{ x: 100, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Link
+                key={group.id}
+                href={`/grades/${group.id}`}
+                className="flex-shrink-0 w-80 h-full flex flex-col justify-between rounded-3xl border border-transparent transition hover:-translate-y-1 hover:border-white/20"
+              >
+                <Card
+                  eyebrow={`Текущая оценка: ${group.grade}`}
+                  title={group.subject}
+                  description={group.description}
+                  percent={group.percent}
+                  footer={group.updated}
+                  highlight={group.percent > 90 ? "Almost" : 'In work'}
+                />
+              </Link>
+            </motion.div>
+          ))}
+        </div>
+        <button
+          onClick={() => scroll("right")}
+          className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-700 text-white px-3 py-2 rounded z-10"
+        ><ArrowRight/></button>
       </div>
 
       <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
