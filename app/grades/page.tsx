@@ -1,5 +1,6 @@
 "use client";
 
+import GradesChart from "../components/GradesChart";
 import Link from 'next/link';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Card from '../components/Card';
@@ -32,7 +33,7 @@ const gradeGroups = [
     updated: 'Вчера · 22:18',
   },
   {
-    id: 'operating-systems',
+    id: '',
     subject: 'Операционные системы',
     grade: 'B-',
     percent: 85,
@@ -153,7 +154,6 @@ export default function GradesPage() {
         </div>
       </div>
 
-
       <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
@@ -168,6 +168,8 @@ export default function GradesPage() {
             <ArrowRight size={16} />
           </Link>
         </div>
+        
+        <GradesChart />
 
         <div className="overflow-hidden rounded-2xl border border-white/10">
           <table className="w-full border-collapse text-left text-sm text-slate-100">
