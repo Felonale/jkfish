@@ -37,7 +37,7 @@ export default function ViewNotePage() {
         .select('id,title,content,tags,created_at,updated_at')
         .eq('id', id)
         .single();
-      if (error) console.error('Ошибка загрузки заметки:', error);
+      if (error) console.error('Ошибка загрузки конспекта:', error);
       if (data) {
         setNote(data);
         setTitle(data.title);
@@ -94,9 +94,17 @@ export default function ViewNotePage() {
     setEditing(false);
   };
 
-  if (!id) return <p className="text-white">Нет id заметки</p>;
-  if (loading) return <p className="text-white">Загрузка...</p>;
-  if (!note) return <p className="text-white">Заметка не найдена</p>;
+  if (!id) return <p className="text-white">Нет id конспекта</p>;
+  if (loading) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="skeleton h-32 w-full"></div>
+      ))}
+    </div>
+  );
+}
+  if (!note) return <p className="text-white">Конспект не найден</p>;
 
   return (
     <div className="space-y-6 text-white">
@@ -112,13 +120,13 @@ export default function ViewNotePage() {
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
-            placeholder="Заголовок заметки"
+            placeholder="Заголовок конспекта"
             className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400"
           />
           <textarea
             value={content}
             onChange={e => setContent(e.target.value)}
-            placeholder="Содержимое заметки"
+            placeholder="Содержимое конспекта"
             className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400"
             rows={10}
           />
@@ -163,7 +171,7 @@ export default function ViewNotePage() {
           </header>
 
           <div className="text-slate-200 whitespace-pre-line">
-            {note.content ?? 'Заметка пустая.'}
+            {note.content ?? 'Конспект пустой.'}
           </div>
 
           {note.tags && note.tags.length > 0 && (
@@ -206,7 +214,7 @@ export default function ViewNotePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-slate-800 p-6 text-white shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Удалить заметку?</h2>
+              <h2 className="text-lg font-semibold">Удалить конспект?</h2>
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
                 className="text-slate-400 hover:text-white"
@@ -216,7 +224,7 @@ export default function ViewNotePage() {
               </button>
             </div>
             <p className="text-sm text-slate-300">
-              Вы уверены, что хотите удалить заметку{' '}
+              Вы уверены, что хотите удалить конспект{' '}
               <strong>«{note.title}»</strong>? Это действие необратимо.
             </p>
             <div className="flex justify-end gap-3 pt-2">

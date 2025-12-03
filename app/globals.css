@@ -37,3 +37,14 @@
     @apply bg-violet-500 text-slate-900;
   }
 }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.skeleton {
+  background-color: #1e293b; /* bg-slate-800 */
+  border-radius: 0.75rem;
+  animation: pulse 1.5s ease-in-out infinite;
+}

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import { ArrowLeft } from 'lucide-react';
 
 export default function NewNotePage() {
   const [title, setTitle] = useState('');
@@ -21,20 +22,14 @@ export default function NewNotePage() {
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
 
-    const { data, error, status } = await supabase.from('notes').insert({
+    const { error } = await supabase.from('notes').insert({
       title: title.trim(),
       content: content.trim() || null,
       tags: tagArray.length > 0 ? tagArray : null,
     });
 
     if (error) {
-      console.error('Ошибка при сохранении:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-        raw: error,
-      });
+      console.error('Ошибка при сохранении:', error);
       setErrorMsg(error.message || 'Неизвестная ошибка');
       return;
     }
@@ -44,7 +39,15 @@ export default function NewNotePage() {
 
   return (
     <div className="max-w-xl mx-auto space-y-6 p-6 text-white">
-      <h1 className="text-2xl font-semibold">Новая заметка</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Новый конспект</h1>
+        <button
+          onClick={() => router.back()}
+          className="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm text-slate-300 hover:text-white hover:bg-slate-700 transition"
+        >
+          <ArrowLeft size={18} /> Назад
+        </button>
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
@@ -57,7 +60,7 @@ export default function NewNotePage() {
         />
 
         <textarea
-          placeholder="Текст заметки"
+          placeholder="Текст конспекта"
           value={content}
           onChange={e => setContent(e.target.value)}
           className="w-full h-40 rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400 resize-none"
@@ -75,7 +78,7 @@ export default function NewNotePage() {
 
         <button
           type="submit"
-          className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 font-semibold text-white"
+          className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 font-semibold text-white hover:scale-105 transition-transform"
         >
           Сохранить
         </button>

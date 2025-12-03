@@ -30,7 +30,7 @@ export default function NotesPage() {
         .from('notes')
         .select('id,title,content,tags,created_at,updated_at')
         .order('updated_at', { ascending: false });
-      if (error) console.error('Ошибка загрузки заметок:', error);
+      if (error) console.error('Ошибка загрузки конспектов:', error);
       if (data) setNotes(data);
       setLoading(false);
     };
@@ -75,27 +75,35 @@ export default function NotesPage() {
     n => !pinnedNotes.includes(n) && !recentNotes.includes(n)
   );
 
-  if (loading) return <p className="text-white">Загрузка...</p>;
+  if (loading) {
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {[...Array(4)].map((_, i) => (
+        <div key={i} className="skeleton h-32 w-full"></div>
+      ))}
+    </div>
+  );
+}
 
   return (
-    <div className="space-y-6 text-white">
+    <div className="space-y-6 text-white animate-fadeInUp">
       <header className="space-y-4">
-        <div className="rounded-xl bg-slate-900 p-6 text-white">
-          <h1 className="text-2xl font-bold">Держите все заметки рядом со спринтом</h1>
+        <div className="rounded-xl bg-slate-900 p-6 text-white shadow-lg hover:shadow-xl transition">
+          <h1 className="text-2xl font-bold">Держите все конспекты рядом со спринтом</h1>
           <p className="text-slate-400">
             Легкая система управления через Subjex.me, так что вы можете использовать её на любом устройстве.
           </p>
           <button
             onClick={() => router.push('/notes/new')}
-            className="mt-4 rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold hover:bg-violet-600"
+            className="mt-4 rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold hover:bg-violet-600 transition-transform hover:scale-105"
           >
-            + Добавить заметку
+            + Добавить конспект
           </button>
         </div>
 
         <input
           placeholder="Поиск по заголовку..."
-          className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400"
+          className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-violet-500 transition"
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
         />
@@ -105,10 +113,10 @@ export default function NotesPage() {
             <button
               key={tag}
               onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-              className={`px-3 py-1 rounded-full text-xs ${
+              className={`px-3 py-1 rounded-full text-xs transition-transform duration-300 ${
                 activeTag === tag
                   ? 'bg-violet-500 text-white'
-                  : 'bg-slate-700 text-slate-300'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105'
               }`}
             >
               {tag}
@@ -116,8 +124,10 @@ export default function NotesPage() {
           ))}
         </div>
 
-        <div className="text-sm text-slate-400">
-          Всего заметок: {notes.length} | Тегов: {uniqueTags.length} | Последнее обновление: {lastUpdate}
+        <div className="text-sm text-slate-400 flex gap-4">
+          <span>Всего конспектов: {notes.length}</span>
+          <span>Тегов: {uniqueTags.length}</span>
+          <span>Последнее обновление: {lastUpdate}</span>
         </div>
       </header>
 
@@ -141,7 +151,7 @@ export default function NotesPage() {
 
       {otherNotes.length > 0 && (
         <Section
-          title="Все заметки"
+          title="Все конспекты"
           notes={otherNotes}
           generateDescription={generateDescription}
           router={router}
@@ -163,7 +173,7 @@ function Section({
   router: any;
 }) {
   return (
-    <section>
+    <section className="animate-fadeInUp">
       <h2 className="text-lg font-semibold mb-2">{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {notes.map(note => (
@@ -222,10 +232,10 @@ function NoteCard({
   }).format(new Date(note.updated_at ?? note.created_at));
 
   return (
-    <div className="rounded-xl bg-slate-800 p-4 space-y-2 shadow hover:shadow-lg transition">
+    <div className="rounded-xl bg-slate-800 p-4 space-y-2 shadow hover:shadow-2xl transition-transform duration-300 hover:scale-105 hover:-translate-y-1 animate-fadeInUp">
       <h3 className="text-lg font-bold">{note.title}</h3>
       <p className="text-sm text-slate-300">
-        {note.content ? generateDescription(note.content) : 'Нет описания'}
+        {note.content ? generateDescription(note.content) : 'Описание отсутствует'}
       </p>
       <p className="text-xs text-slate-400">Обновлено {formattedDate}</p>
       {note.tags && note.tags.length > 0 && (
@@ -233,7 +243,7 @@ function NoteCard({
           {note.tags.map(tag => (
             <li
               key={tag}
-              className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em]"
+                            className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em] transition-transform duration-300 hover:bg-violet-400/20 hover:scale-105"
             >
               {tag}
             </li>
@@ -243,32 +253,32 @@ function NoteCard({
       <div className="flex gap-3 pt-2">
         <button
           onClick={() => router.push(`/notes/view?id=${note.id}`)}
-          className="inline-flex items-center gap-2 text-sm text-violet-400 hover:underline"
+          className="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 hover:scale-105 transition-transform"
         >
           <Eye size={16} /> Открыть
         </button>
         <button
           onClick={exportMarkdown}
-          className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:underline"
+          className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 hover:scale-105 transition-transform"
         >
           <FileDown size={16} /> Экспорт .md
         </button>
         <button
           onClick={() => setConfirmDeleteOpen(true)}
-          className="inline-flex items-center gap-2 text-sm text-red-400 hover:underline"
+          className="inline-flex items-center gap-2 text-sm text-red-400 hover:text-red-300 hover:scale-105 transition-transform"
         >
           <Trash2 size={16} /> Удалить
         </button>
       </div>
 
       {confirmDeleteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-slate-900 p-6 text-white shadow-xl space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeInUp">
+          <div className="w-full max-w-md rounded-2xl bg-slate-900 p-6 text-white shadow-xl space-y-4 animate-scaleIn">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Удалить заметку?</h2>
+              <h2 className="text-lg font-semibold">Удалить конспект?</h2>
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-slate-400 hover:text-white transition"
                 aria-label="Закрыть"
               >
                 <X size={20} />
@@ -280,13 +290,13 @@ function NoteCard({
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
-                className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10"
+                className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10 transition"
               >
                 Отмена
               </button>
               <button
                 onClick={deleteNote}
-                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600"
+                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-transform hover:scale-105"
               >
                 Удалить
               </button>
@@ -297,4 +307,3 @@ function NoteCard({
     </div>
   );
 }
-
