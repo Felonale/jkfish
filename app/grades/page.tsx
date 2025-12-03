@@ -62,10 +62,13 @@ const breakdownRows = [
 
 export default function GradesPage() {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const CARD_WIDTH = 320;
+  const GAP = 16;
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
+      const offset = direction === "right" ? CARD_WIDTH + GAP : -(CARD_WIDTH + GAP);
       scrollRef.current.scrollBy({
-        left: direction === "right" ? 300 : -300,
+        left: offset,
         behavior: "smooth",
       });
     }
@@ -95,45 +98,61 @@ export default function GradesPage() {
         </div>
       </header>  
       
-      <div className="relative">
-        <button
-          onClick={() => scroll("left")}
-          className="absolute left-4 top-1/2 -translate-y-1/2 bg-gray-700 text-white px-3 py-2 rounded z-10"
-        ><ArrowLeft/></button>
-        <div
-          ref={scrollRef}
-          className="flex gap-4 overflow-x-auto items-end pb-4 px-20 scrollbar-hide h-[300px] scroll-smooth"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {gradeGroups.map(group => (
-            <motion.div
-              key={group.id}
-              initial={{ x: 100, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <Link
-                key={group.id}
-                href={`/grades/${group.id}`}
-                className="flex-shrink-0 w-80 h-full flex flex-col justify-between rounded-3xl border border-transparent transition hover:-translate-y-1 hover:border-white/20"
-              >
-                <Card
-                  eyebrow={`Текущая оценка: ${group.grade}`}
-                  title={group.subject}
-                  description={group.description}
-                  percent={group.percent}
-                  footer={group.updated}
-                  highlight={group.percent > 90 ? "Almost" : 'In work'}
-                />
-              </Link>
-            </motion.div>
-          ))}
+      <div className="relative flex items-center h-[300px]">
+        {/* Левая стрелка */}
+        <div className="absolute left-0 z-20 flex items-center h-full px-4">
+          <button
+            onClick={() => scroll("left")}
+            className="bg-gray-700 text-white px-3 py-2 rounded"
+          >
+            <ArrowLeft />
+          </button>
         </div>
-        <button
-          onClick={() => scroll("right")}
-          className="absolute right-4 top-1/2 -translate-y-1/2 bg-gray-700 text-white px-3 py-2 rounded z-10"
-        ><ArrowRight/></button>
+
+        {/* Центральный контейнер с карточками */}
+        <div className="mx-[100px] w-full overflow-hidden">
+          <div
+            ref={scrollRef}
+            className="flex gap-4 overflow-x-auto items-stretch scrollbar-hide scroll-smooth"
+            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+          >
+            {gradeGroups.map(group => (
+              <motion.div
+                key={group.id}
+                initial={{ x: 100, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="flex-shrink-0 w-80 h-full"
+              >
+                <Link
+                  href={`/grades/${group.id}`}
+                  className="flex flex-col justify-between h-full rounded-3xl border border-transparent transition hover:-translate-y-1 hover:border-white/20"
+                >
+                  <Card
+                    eyebrow={`Текущая оценка: ${group.grade}`}
+                    title={group.subject}
+                    description={group.description}
+                    percent={group.percent}
+                    footer={group.updated}
+                    highlight={group.percent > 90 ? "Almost" : 'In work'}
+                  />
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Правая стрелка */}
+        <div className="absolute right-0 z-20 flex items-center h-full px-4">
+          <button
+            onClick={() => scroll("right")}
+            className="bg-gray-700 text-white px-3 py-2 rounded"
+          >
+            <ArrowRight />
+          </button>
+        </div>
       </div>
+
 
       <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
         <div className="flex flex-wrap items-center justify-between gap-3">
