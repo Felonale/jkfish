@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { createClient } from '@/lib/supabase/server';
 import { ArrowLeft, BadgeCheck, BookOpen, Gauge, TrendingUp } from 'lucide-react';
+import { p } from 'framer-motion/client';
 
 type GradeOverview = {
   id: string;
@@ -40,6 +41,24 @@ const fallback: Record<string, GradeOverview> = {
     percent: 84,
     credits: 4,
     updatedAt: '31 января, 18:40',
+  },
+  programming: {
+    id: 'programming',
+    title: 'Fullstack-разработка',
+    description: 'Проект на Next.js + Drizzle уходит в code review.',
+    grade: 'A-',
+    percent: 88,
+    credits: 6,
+    updatedAt: '3 декабрья, 20:15',
+  },
+  'operating-systems': {
+    id: 'operating-systems',
+    title: 'Операционные системы',
+    description: 'Сделать на виндовс несколько директорий и присвоить им разные статусы разрешения.',
+    grade: 'B-',
+    percent: 85,
+    credits: 5,
+    updatedAt: '30 января, 20:15',
   },
 };
 
