@@ -12,26 +12,38 @@ export async function PUT(request: Request) {
       return NextResponse.json({ error: 'Необходима авторизация' }, { status: 401 });
     }
 
-    const { name, email, phone, location, cohort, track } = await request.json();
+    const { inn, firstName, lastName, middleName, groupName, city, courseName } = await request.json();
+    const innNumber = Number(inn);
 
-    const updates: Parameters<typeof supabase.auth.updateUser>[0] = {
-      data: {
-        full_name: name,
-        phone,
-        location,
-        cohort,
-        track,
-      },
-    };
-
-    if (email && email !== user.email) {
-      updates.email = email;
+    if (!innNumber || !firstName || !lastName) {
+      return NextResponse.json({ error: 'Заполните ИНН, имя и фамилию' }, { status: 400 });
     }
 
-    const { error } = await supabase.auth.updateUser(updates);
+    const { error: upsertError } = await supabase.from('students').upsert({
+      INN: innNumber,
+      Name: firstName,
+      Last_Name: lastName,
+      Middle_Name: middleName || null,
+    });
 
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 400 });
+    if (upsertError) {
+      return NextResponse.json({ error: upsertError.message }, { status: 400 });
+    }
+
+    const fullName = `${firstName} ${lastName}${middleName ? ` ${middleName}` : ''}`;
+
+    const { error: updateError } = await supabase.auth.updateUser({
+      data: {
+        student_inn: innNumber,
+        full_name: fullName,
+        group_name: groupName ?? '',
+        city: city ?? '',
+        course_name: courseName ?? '',
+      },
+    });
+
+    if (updateError) {
+      return NextResponse.json({ error: updateError.message }, { status: 400 });
     }
 
     return NextResponse.json({ success: true });

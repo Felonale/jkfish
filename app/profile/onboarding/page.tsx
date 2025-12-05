@@ -46,6 +46,8 @@ export default function ProfileOnboardingPage() {
         return;
       }
 
+      console.log("test1");
+
       const { error: upsertError } = await supabase.from('students').upsert({
         INN: innNumber,
         Name: form.firstName,
@@ -56,6 +58,8 @@ export default function ProfileOnboardingPage() {
       if (upsertError) {
         throw upsertError;
       }
+
+      console.log("test2");
 
       const fullName = `${form.firstName} ${form.lastName}${form.middleName ? ` ${form.middleName}` : ''}`;
 
@@ -69,6 +73,8 @@ export default function ProfileOnboardingPage() {
       if (updateError) {
         throw updateError;
       }
+
+      console.log("test3");
 
       setMessage('Данные сохранены. Перенаправляем в профиль…');
       router.push('/profile');

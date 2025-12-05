@@ -2,133 +2,144 @@
 
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { Loader2, Save } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 type ProfileFormProps = {
   initialData: {
-    name: string;
-    email: string;
-    phone: string;
-    location: string;
-    cohort: string;
-    track: string;
+    inn: string;
+    firstName: string;
+    lastName: string;
+    middleName: string;
+    groupName: string;
+    city: string;
+    courseName: string;
   };
 };
 
 export function ProfileForm({ initialData }: ProfileFormProps) {
-  const router = useRouter();
   const [form, setForm] = useState(initialData);
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const handleChange = (field: keyof typeof form) => (event: ChangeEvent<HTMLInputElement>) => {
-    setForm(prev => ({ ...prev, [field]: event.target.value }));
-  };
+  const handleChange =
+    (field: keyof typeof form) => (event: ChangeEvent<HTMLInputElement>) => {
+      setForm(prev => ({ ...prev, [field]: event.target.value }));
+    };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setPending(true);
     setMessage(null);
 
-try {
-  const response = await fetch('/api/profile', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(form),
-  });
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
 
-  const payload = await response.json();
+      const payload = await response.json();
 
-  if (!response.ok) {
-    throw new Error(payload.error ?? 'Не удалось обновить профиль');
-  }
+      if (!response.ok) {
+        throw new Error(payload.error ?? 'Не удалось обновить профиль');
+      }
 
-  setMessage('Профиль обновлён');
-  router.push('/profile');
-  // или router.replace('/profile');
-} catch (error) {
-  setMessage(error instanceof Error ? error.message : 'Что-то пошло не так');
-} finally {
-  setPending(false);
-}
-
+      setMessage('Данные сохранены. Обновите страницу, чтобы увидеть изменения.');
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Что-то пошло не так');
+    } finally {
+      setPending(false);
+    }
   };
 
   return (
     <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h2 className="text-2xl font-semibold">Редактирование профиля</h2>
+          <h2 className="text-2xl font-semibold">Данные студента (students)</h2>
           <p className="text-sm text-slate-400">
-            Измените контактные данные. Изменение email потребует подтверждения.
+            ИНН/ФИО записываем в таблицу students, остальное сохраняем в метаданных профиля.
           </p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
+        <label className="flex flex-col gap-2 text-sm text-slate-200 md:col-span-2">
+          ИНН
+          <input
+            type="number"
+            value={form.inn}
+            onChange={handleChange('inn')}
+            required
+            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
+            placeholder="Например, 123456789012"
+          />
+        </label>
+
         <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Имя и фамилия
+          Имя
           <input
             type="text"
-            value={form.name}
-            onChange={handleChange('name')}
+            value={form.firstName}
+            onChange={handleChange('firstName')}
+            required
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="Введите имя"
+            placeholder="Иван"
           />
         </label>
 
         <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Email
-          <input
-            type="email"
-            value={form.email}
-            onChange={handleChange('email')}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="you@jkfish.dev"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Телефон
-          <input
-            type="tel"
-            value={form.phone}
-            onChange={handleChange('phone')}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="+7 (700) 000-00-00"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Локация
+          Фамилия
           <input
             type="text"
-            value={form.location}
-            onChange={handleChange('location')}
+            value={form.lastName}
+            onChange={handleChange('lastName')}
+            required
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="Алматы · гибрид"
+            placeholder="Иванов"
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm text-slate-200 md:col-span-2">
+          Отчество (необязательно)
+          <input
+            type="text"
+            value={form.middleName}
+            onChange={handleChange('middleName')}
+            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
+            placeholder="Сергеевич"
           />
         </label>
 
         <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Группа / Cohort
+          Группа
           <input
             type="text"
-            value={form.cohort}
-            onChange={handleChange('cohort')}
+            value={form.groupName}
+            onChange={handleChange('groupName')}
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="Cohort · 2025"
+            placeholder="Группа / Cohort"
           />
         </label>
 
         <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Трек обучения
+          Город
           <input
             type="text"
-            value={form.track}
-            onChange={handleChange('track')}
+            value={form.city}
+            onChange={handleChange('city')}
             className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="Fullstack + Data"
+            placeholder="Алматы"
+          />
+        </label>
+
+        <label className="flex flex-col gap-2 text-sm text-slate-200 md:col-span-2">
+          Название курса
+          <input
+            type="text"
+            value={form.courseName}
+            onChange={handleChange('courseName')}
+            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
+            placeholder="Вычислительная техника и программное обеспечение"
           />
         </label>
 
@@ -146,15 +157,11 @@ try {
             ) : (
               <>
                 <Save size={16} />
-                Сохранить изменения
+                Сохранить
               </>
             )}
           </button>
-          {message && (
-            <p className="text-sm text-slate-200">
-              {message}
-            </p>
-          )}
+          {message && <p className="text-sm text-slate-200">{message}</p>}
         </div>
       </form>
     </section>

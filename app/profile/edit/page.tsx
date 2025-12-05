@@ -27,13 +27,24 @@ export default async function EditProfilePage() {
     );
   }
 
-  const profile = {
-    name: user.user_metadata?.full_name ?? 'Безымянный студент',
-    cohort: user.user_metadata?.cohort ?? 'Cohort · 2025',
-    track: user.user_metadata?.track ?? 'Fullstack + Data',
-    location: user.user_metadata?.location ?? 'Алматы · гибрид',
-    phone: user.user_metadata?.phone ?? '+7 (700) 000-00-00',
-    email: user.email ?? '',
+  const studentInn = user.user_metadata?.student_inn;
+
+  const { data: studentRow } = studentInn
+    ? await supabase
+        .from('students')
+        .select('INN,Name,Last_Name,Middle_Name')
+        .eq('INN', studentInn)
+        .maybeSingle()
+    : { data: null };
+
+  const initial = {
+    inn: studentInn ? String(studentInn) : '',
+    firstName: studentRow?.Name ?? '',
+    lastName: studentRow?.Last_Name ?? '',
+    middleName: studentRow?.Middle_Name ?? '',
+    groupName: user.user_metadata?.group_name ?? '',
+    city: user.user_metadata?.city ?? '',
+    courseName: user.user_metadata?.course_name ?? 'Вычислительная техника и программное обеспечение',
   };
 
   return (
@@ -45,16 +56,7 @@ export default async function EditProfilePage() {
         <ArrowLeft size={16} />
         Назад к профилю
       </Link>
-      <ProfileForm
-        initialData={{
-          name: profile.name,
-          email: profile.email,
-          phone: profile.phone,
-          location: profile.location,
-          cohort: profile.cohort,
-          track: profile.track,
-        }}
-      />
+      <ProfileForm initialData={initial} />
     </div>
   );
 }
