@@ -22,6 +22,7 @@ export default function NotesPage() {
   const [loading, setLoading] = useState(true);
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOption, setSortOption] = useState('name');
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -31,7 +32,7 @@ export default function NotesPage() {
         .select('id,title,content,tags,created_at,updated_at')
         .order('updated_at', { ascending: false });
       if (error) console.error('Ошибка загрузки конспектов:', error);
-      if (data) setNotes(data);
+      if (data) setNotes(data as Note[]);
       setLoading(false);
     };
     fetchNotes();
@@ -57,33 +58,42 @@ export default function NotesPage() {
     : '—';
 
   const filteredNotes = notes.filter(n => {
-    const matchesTag = activeTag ? n.tags?.includes(activeTag) : true;
-    const matchesSearch = searchQuery
-      ? n.title.toLowerCase().includes(searchQuery.toLowerCase())
-      : true;
+    const q = searchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const matchesTag = activeTag ? (n.tags ?? []).includes(activeTag) : true;
+    const text = [
+      n.title.toLowerCase(),
+      (n.content ?? '').toLowerCase(),
+      (n.tags ?? []).join(' ').toLowerCase()
+    ].join(' ');
+    const matchesSearch = q.length > 0 ? q.every(word => text.includes(word)) : true;
     return matchesTag && matchesSearch;
   });
 
-  const pinnedNotes = filteredNotes.filter(n => n.tags?.includes('pinned'));
-  const recentNotes = [...filteredNotes]
-    .sort(
-      (a, b) =>
-        new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-    )
-    .slice(0, 5);
-  const otherNotes = filteredNotes.filter(
-    n => !pinnedNotes.includes(n) && !recentNotes.includes(n)
-  );
+  const sortedNotes = [...filteredNotes].sort((a, b) => {
+    if (sortOption === 'name') {
+      return a.title.localeCompare(b.title, 'ru', { sensitivity: 'base' });
+    }
+    if (sortOption === 'nameDesc') {
+      return b.title.localeCompare(a.title, 'ru', { sensitivity: 'base' });
+    }
+    if (sortOption === 'tags') {
+      return (b.tags?.length ?? 0) - (a.tags?.length ?? 0);
+    }
+    if (sortOption === 'date') {
+      return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+    }
+    return 0;
+  });
 
   if (loading) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="skeleton h-32 w-full"></div>
-      ))}
-    </div>
-  );
-}
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="skeleton h-32 w-full"></div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 text-white animate-fadeInUp">
@@ -101,12 +111,36 @@ export default function NotesPage() {
           </button>
         </div>
 
-        <input
-          placeholder="Поиск по заголовку..."
-          className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400 focus:ring-2 focus:ring-violet-500 transition"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-        />
+        <div className="relative w-full">
+          <input
+            type="text"
+            placeholder="Поиск по заголовку, содержимому и тегам..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl bg-slate-800 p-3 pl-10 text-white placeholder-slate-400 focus:ring-2 focus:ring-violet-500 transition"
+          />
+          <span className="absolute left-3 top-3 text-slate-400">🔍</span>
+        </div>
+
+        <div className="flex gap-2 flex-wrap">
+          {[
+            { key: 'name', label: 'Имя A–Z', icon: '🔤' },
+            { key: 'nameDesc', label: 'Имя Z–A', icon: '🔡' },
+            { key: 'date', label: 'Дата', icon: '⏰' },
+          ].map(opt => (
+            <button
+              key={opt.key}
+              onClick={() => setSortOption(opt.key)}
+              className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 transition-transform duration-300 ${
+                sortOption === opt.key
+                  ? 'bg-violet-500 text-white'
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105'
+              }`}
+            >
+              <span>{opt.icon}</span> {opt.label}
+            </button>
+          ))}
+        </div>
 
         <div className="flex gap-2 flex-wrap">
           {uniqueTags.map(tag => (
@@ -131,32 +165,12 @@ export default function NotesPage() {
         </div>
       </header>
 
-      {pinnedNotes.length > 0 && (
-        <Section
-          title="Закреплённые"
-          notes={pinnedNotes}
-          generateDescription={generateDescription}
-          router={router}
-        />
-      )}
-
-      {recentNotes.length > 0 && (
-        <Section
-          title="Недавние изменения"
-          notes={recentNotes}
-          generateDescription={generateDescription}
-          router={router}
-        />
-      )}
-
-      {otherNotes.length > 0 && (
-        <Section
-          title="Все конспекты"
-          notes={otherNotes}
-          generateDescription={generateDescription}
-          router={router}
-        />
-      )}
+      <Section
+        title="Все конспекты"
+        notes={sortedNotes}
+        generateDescription={generateDescription}
+        router={router}
+      />
     </div>
   );
 }
@@ -217,7 +231,7 @@ function NoteCard({
   const deleteNote = async () => {
     const { error } = await supabase.from('notes').delete().eq('id', note.id);
     if (error) {
-      console.error('Ошибка удаления:', error);
+            console.error('Ошибка удаления:', error);
       return;
     }
     setConfirmDeleteOpen(false);
@@ -243,7 +257,7 @@ function NoteCard({
           {note.tags.map(tag => (
             <li
               key={tag}
-                            className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em] transition-transform duration-300 hover:bg-violet-400/20 hover:scale-105"
+              className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em] transition-transform duration-300 hover:bg-violet-400/20 hover:scale-105"
             >
               {tag}
             </li>
@@ -301,9 +315,10 @@ function NoteCard({
                 Удалить
               </button>
             </div>
-          </div>
+          </div>  
         </div>
       )}
     </div>
   );
 }
+     
