@@ -1,40 +1,49 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Clock3, MapPin, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from "react";
+import { Clock3, MapPin, RefreshCw, X } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
-type Session = { time: string; subject: string; type: string; location: string };
+type Session = {
+  id: number;
+  day: string;
+  time: string;
+  subject: string;
+  type: string;
+  location: string;
+  courseName?: string;
+};
+
 type DaySchedule = { day: string; sessions: Session[] };
-type Note = { id: number; title: string; description: string; location: string; duration: string };
-type EventForm = { day: string; time: string; subject: string; type: string; location: string };
+
+type Note = {
+  id: string;
+  title: string;
+  description: string;
+  location: string;
+  duration: string;
+};
+
 type NoteForm = { title: string; description: string; location: string; duration: string };
 
 const weekOrder = [
-  'Понедельник',
-  'Вторник',
-  'Среда',
-  'Четверг',
-  'Пятница',
-  'Суббота',
-  'Воскресенье',
+  "Понедельник",
+  "Вторник",
+  "Среда",
+  "Четверг",
+  "Пятница",
+  "Суббота",
+  "Воскресенье",
 ];
 
 const sortByTime = (sessions: Session[]) =>
   [...sessions].sort((a, b) => a.time.localeCompare(b.time));
 
-const emptyEventForm: EventForm = {
-  day: 'Понедельник',
-  time: '',
-  subject: '',
-  type: '',
-  location: '',
-};
-
 const emptyNoteForm: NoteForm = {
-  title: '',
-  description: '',
-  location: '',
-  duration: '',
+  title: "",
+  description: "",
+  location: "",
+  duration: "",
 };
 
 type BaseModalProps = {
@@ -55,7 +64,7 @@ function BaseModal({ title, onSubmit, onClose, buttonGradient, children }: BaseM
         <h3 className="mb-4 text-2xl font-semibold">{title}</h3>
         <form
           className="space-y-4"
-          onSubmit={e => {
+          onSubmit={(e) => {
             e.preventDefault();
             onSubmit();
           }}
@@ -73,80 +82,6 @@ function BaseModal({ title, onSubmit, onClose, buttonGradient, children }: BaseM
   );
 }
 
-type EventModalProps = {
-  form: EventForm;
-  setForm: React.Dispatch<React.SetStateAction<EventForm>>;
-  onSubmit: () => void;
-  onClose: () => void;
-  title: string;
-};
-
-function EventModal({ form, setForm, onSubmit, onClose, title }: EventModalProps) {
-  const change = (field: keyof EventForm, v: string) => setForm(p => ({ ...p, [field]: v }));
-
-  return (
-    <BaseModal title={title} onSubmit={onSubmit} onClose={onClose} buttonGradient="bg-gradient-to-r from-violet-500 to-cyan-400">
-      <div>
-        <label className="text-sm text-slate-300">День недели</label>
-        <select
-          value={form.day}
-          onChange={e => change('day', e.target.value)}
-          className="mt-1 w-full rounded-xl border border-slate-700/70 bg-slate-900 px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-cyan-400/70"
-        >
-          {weekOrder.map(day => (
-            <option key={day} value={day} className="bg-slate-900 text-slate-100">
-              {day}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label className="text-sm text-slate-300">Время</label>
-        <input
-          type="time"
-          value={form.time}
-          onChange={e => change('time', e.target.value)}
-          className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm text-slate-300">Название</label>
-        <input
-          type="text"
-          value={form.subject}
-          onChange={e => change('subject', e.target.value)}
-          placeholder="Например: Семинар по JS"
-          className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm text-slate-300">Тип</label>
-        <input
-          type="text"
-          value={form.type}
-          onChange={e => change('type', e.target.value)}
-          placeholder="Лекция / Семинар / Workshop"
-          className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
-        />
-      </div>
-
-      <div>
-        <label className="text-sm text-slate-300">Локация</label>
-        <input
-          type="text"
-          value={form.location}
-          onChange={e => change('location', e.target.value)}
-          placeholder="Кампус · Аудитория"
-          className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
-        />
-      </div>
-    </BaseModal>
-  );
-}
-
 type NoteModalProps = {
   form: NoteForm;
   setForm: React.Dispatch<React.SetStateAction<NoteForm>>;
@@ -156,16 +91,21 @@ type NoteModalProps = {
 };
 
 function NoteModal({ form, setForm, onSubmit, onClose, title }: NoteModalProps) {
-  const change = (field: keyof NoteForm, v: string) => setForm(p => ({ ...p, [field]: v }));
+  const change = (field: keyof NoteForm, v: string) => setForm((p) => ({ ...p, [field]: v }));
 
   return (
-    <BaseModal title={title} onSubmit={onSubmit} onClose={onClose} buttonGradient="bg-gradient-to-r from-green-500 to-emerald-400">
+    <BaseModal
+      title={title}
+      onSubmit={onSubmit}
+      onClose={onClose}
+      buttonGradient="bg-gradient-to-r from-green-500 to-emerald-400"
+    >
       <div>
         <label className="text-sm text-slate-300">Название заметки</label>
         <input
           type="text"
           value={form.title}
-          onChange={e => change('title', e.target.value)}
+          onChange={(e) => change("title", e.target.value)}
           className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
         />
       </div>
@@ -175,27 +115,27 @@ function NoteModal({ form, setForm, onSubmit, onClose, title }: NoteModalProps) 
         <input
           type="text"
           value={form.description}
-          onChange={e => change('description', e.target.value)}
+          onChange={(e) => change("description", e.target.value)}
           className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
         />
       </div>
 
       <div>
-        <label className="text-sm text-slate-300">Кабинет для сдачи</label>
+        <label className="text-sm text-slate-300">Локация</label>
         <input
           type="text"
           value={form.location}
-          onChange={e => change('location', e.target.value)}
+          onChange={(e) => change("location", e.target.value)}
           className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
         />
       </div>
 
       <div>
-        <label className="text-sm text-slate-300">Сроки сдачи</label>
+        <label className="text-sm text-slate-300">Длительность</label>
         <input
           type="text"
           value={form.duration}
-          onChange={e => change('duration', e.target.value)}
+          onChange={(e) => change("duration", e.target.value)}
           className="mt-1 w-full rounded-xl bg-white/10 p-2 text-white"
         />
       </div>
@@ -203,23 +143,23 @@ function NoteModal({ form, setForm, onSubmit, onClose, title }: NoteModalProps) 
   );
 }
 
-export default function SchedulePage() {
-  const [weekSchedule, setWeekSchedule] = useState<DaySchedule[]>([]);
-  const [eventForm, setEventForm] = useState<EventForm>(emptyEventForm);
-  const [editKey, setEditKey] = useState<{ day: string; time: string; subject: string } | null>(null);
+const getDayLabel = (date: string) => {
+  const d = new Date(date);
+  const idx = d.getDay(); // 0=Sun
+  const map = [6, 0, 1, 2, 3, 4, 5]; // convert to index in weekOrder
+  return weekOrder[map[idx]] ?? weekOrder[0];
+};
 
+export default function SchedulePage() {
+  const supabase = useMemo(() => createClient(), []);
+
+  const [weekSchedule, setWeekSchedule] = useState<DaySchedule[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [noteForm, setNoteForm] = useState<NoteForm>(emptyNoteForm);
-  const [noteEditId, setNoteEditId] = useState<number | null>(null);
-
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [noteEditId, setNoteEditId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false);
-
-  const closeEventModal = () => {
-    setIsEventModalOpen(false);
-    setEditKey(null);
-    setEventForm(emptyEventForm);
-  };
+  const [error, setError] = useState<string | null>(null);
 
   const closeNoteModal = () => {
     setIsNoteModalOpen(false);
@@ -227,96 +167,136 @@ export default function SchedulePage() {
     setNoteForm(emptyNoteForm);
   };
 
-  const upsertSession = (targetDay: string, session: Session) => {
-    setWeekSchedule(prev => {
-      let days = prev.map(d => ({ ...d, sessions: [...d.sessions] }));
-
-      // удалить старую сессию, если редактируем
-      if (editKey) {
-        days = days
-          .map(d =>
-            d.day === editKey.day
-              ? {
-                  ...d,
-                  sessions: d.sessions.filter(
-                    s => !(s.time === editKey.time && s.subject === editKey.subject),
-                  ),
-                }
-              : d,
-          )
-          .filter(d => d.sessions.length > 0);
-      }
-
-      const idx = days.findIndex(d => d.day === targetDay);
-      if (idx === -1) {
-        days.push({ day: targetDay, sessions: [session] });
-      } else {
-        days[idx].sessions = sortByTime([...days[idx].sessions, session]);
-      }
-
-      days.sort((a, b) => weekOrder.indexOf(a.day) - weekOrder.indexOf(b.day));
-      return days;
+  const groupSessions = (sessions: Session[]) => {
+    const byDay = new Map<string, Session[]>();
+    sessions.forEach((s) => {
+      const arr = byDay.get(s.day) ?? [];
+      arr.push(s);
+      byDay.set(s.day, arr);
     });
+    const result: DaySchedule[] = Array.from(byDay.entries()).map(([day, ses]) => ({
+      day,
+      sessions: sortByTime(ses),
+    }));
+    result.sort((a, b) => weekOrder.indexOf(a.day) - weekOrder.indexOf(b.day));
+    return result;
   };
 
-  const handleCreateEvent = () => {
-    upsertSession(eventForm.day, {
-      time: eventForm.time,
-      subject: eventForm.subject,
-      type: eventForm.type,
-      location: eventForm.location,
-    });
-    closeEventModal();
-  };
+  const fetchData = async () => {
+    setLoading(true);
+    setError(null);
 
-  const handleEditEvent = () => {
-    if (!editKey) return;
-    upsertSession(eventForm.day, {
-      time: eventForm.time,
-      subject: eventForm.subject,
-      type: eventForm.type,
-      location: eventForm.location,
-    });
-    closeEventModal();
-  };
+    const {
+      data: { user },
+      error: userErr,
+    } = await supabase.auth.getUser();
+    if (userErr) {
+      setError(userErr.message);
+      setLoading(false);
+      return;
+    }
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
-  const handleDeleteEvent = (dayName: string, time: string, subject: string) => {
-    setWeekSchedule(prev =>
-      prev
-        .map(d =>
-          d.day === dayName
-            ? {
-                ...d,
-                sessions: d.sessions.filter(s => !(s.time === time && s.subject === subject)),
-              }
-            : d,
+    const { data: studentRow } = await supabase
+      .from("students")
+      .select("inn")
+      .eq("user_id", user.id)
+      .maybeSingle();
+
+    const studentInn = studentRow?.inn;
+
+    const { data: enrollments } = await supabase
+      .from("enrollments")
+      .select("course_id")
+      .eq("student_inn", studentInn ?? 0);
+
+    const courseIds = (enrollments ?? []).map((e) => e.course_id).filter(Boolean);
+
+    let sessions: Session[] = [];
+    if (courseIds.length > 0) {
+      const { data: sessionRows, error: sessionErr } = await supabase
+        .from("course_sessions")
+        .select(
+          "id, course_id, starts_at, session_type, topic, location, courses(subjects(name, code))"
         )
-        .filter(d => d.sessions.length > 0),
-    );
+        .in("course_id", courseIds)
+        .order("starts_at", { ascending: true })
+        .limit(200);
+
+      if (sessionErr) setError(sessionErr.message);
+
+      sessions =
+        sessionRows?.map((row) => {
+          const dayLabel = getDayLabel(row.starts_at);
+          const time = new Date(row.starts_at).toLocaleTimeString("ru-RU", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+          return {
+            id: row.id,
+            day: dayLabel,
+            time,
+            subject: row.topic || row.courses?.subjects?.name || `Курс ${row.course_id}`,
+            type: row.session_type || "lesson",
+            location: row.location || "—",
+            courseName: row.courses?.subjects?.name,
+          };
+        }) ?? [];
+    }
+    setWeekSchedule(groupSessions(sessions));
+
+    const { data: noteRows, error: notesErr } = await supabase
+      .from("notes")
+      .select("id, title, content, tags")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (notesErr) setError(notesErr.message);
+
+    const mappedNotes: Note[] =
+      noteRows?.map((n) => ({
+        id: n.id,
+        title: n.title,
+        description: n.content ?? "",
+        location: n.tags?.[0] ?? "",
+        duration: n.tags?.[1] ?? "",
+      })) ?? [];
+    setNotes(mappedNotes);
+
+    setLoading(false);
   };
 
-  const openCreateEvent = () => {
-    setEditKey(null);
-    setEventForm(emptyEventForm);
-    setIsEventModalOpen(true);
-  };
+  useEffect(() => {
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const openEditEvent = (day: string, session: Session) => {
-    setEditKey({ day, time: session.time, subject: session.subject });
-    setEventForm({ day, time: session.time, subject: session.subject, type: session.type, location: session.location });
-    setIsEventModalOpen(true);
-  };
-
-  const handleCreateNote = () => {
-    const note: Note = { id: Date.now(), ...noteForm };
-    setNotes(prev => [...prev, note]);
+  const handleCreateNote = async () => {
+    const tags = [noteForm.location, noteForm.duration].filter(Boolean);
+    await supabase.from("notes").insert({
+      title: noteForm.title,
+      content: noteForm.description,
+      tags,
+    });
     closeNoteModal();
+    fetchData();
   };
 
-  const handleEditNote = () => {
-    if (noteEditId == null) return;
-    setNotes(prev => prev.map(n => (n.id === noteEditId ? { ...n, ...noteForm } : n)));
+  const handleEditNote = async () => {
+    if (!noteEditId) return;
+    const tags = [noteForm.location, noteForm.duration].filter(Boolean);
+    await supabase
+      .from("notes")
+      .update({
+        title: noteForm.title,
+        content: noteForm.description,
+        tags,
+      })
+      .eq("id", noteEditId);
     closeNoteModal();
+    fetchData();
   };
 
   const openCreateNote = () => {
@@ -336,38 +316,53 @@ export default function SchedulePage() {
     setIsNoteModalOpen(true);
   };
 
-  const handleDeleteNote = (id: number) => setNotes(prev => prev.filter(n => n.id !== id));
+  const handleDeleteNote = async (id: string) => {
+    await supabase.from("notes").delete().eq("id", id);
+    fetchData();
+  };
 
   return (
     <div className="space-y-8">
       <header className="flex flex-wrap justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-300">Ваш темп обучения</p>
-          <h2 className="mt-2 text-3xl font-semibold">Гибкое расписание, синхронизированное с Supabase.</h2>
+          <p className="text-xs uppercase tracking-[0.35em] text-slate-300">Учебный график</p>
+          <h2 className="mt-2 text-3xl font-semibold">
+            Расписание из Supabase. Студент видит свои пары и может вести заметки.
+          </h2>
         </div>
         <div className="flex gap-3">
-          <button
-            onClick={openCreateEvent}
-            className="rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Добавить событие
-          </button>
           <button
             onClick={openCreateNote}
             className="rounded-2xl bg-gradient-to-r from-green-500 to-emerald-400 px-4 py-2 text-sm font-semibold text-white"
           >
             Добавить заметку
           </button>
+          <button
+            onClick={fetchData}
+            className="rounded-2xl border border-white/20 px-3 py-2 text-sm font-semibold text-white"
+            title="Обновить данные"
+          >
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+          </button>
         </div>
       </header>
 
+      {error && (
+        <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-100">
+          Ошибка загрузки: {error}
+        </div>
+      )}
+
       <section className="grid gap-4 md:grid-cols-3">
-        {weekSchedule.map(day => (
+        {weekSchedule.map((day) => (
           <article key={day.day} className="rounded-2xl border border-white/10 bg-slate-900/50 p-4">
             <h3 className="text-lg font-semibold text-white">{day.day}</h3>
             <ul className="mt-4 space-y-3">
-              {day.sessions.map(session => (
-                <li key={`${day.day}-${session.time}-${session.subject}`} className="rounded-2xl border border-white/5 bg-white/5 p-3">
+              {day.sessions.map((session) => (
+                <li
+                  key={session.id}
+                  className="rounded-2xl border border-white/5 bg-white/5 p-3 transition"
+                >
                   <div className="inline-flex w-full justify-between text-sm text-slate-400">
                     <div className="flex w-full items-center">
                       <Clock3 size={16} className="mr-1" />
@@ -378,20 +373,11 @@ export default function SchedulePage() {
                     </span>
                   </div>
                   <strong className="flex w-full text-white">{session.subject}</strong>
-                  <div className="mt-2 inline-flex items-center gap-2 text-sm text-slate-400">{session.location}</div>
-                  <div className="mt-3 flex gap-4 text-xs">
-                    <button
-                      onClick={() => openEditEvent(day.day, session)}
-                      className="text-cyan-300 underline hover:text-cyan-400"
-                    >
-                      Изменить
-                    </button>
-                    <button
-                      onClick={() => handleDeleteEvent(day.day, session.time, session.subject)}
-                      className="text-red-300 underline hover:text-red-400"
-                    >
-                      Удалить
-                    </button>
+                  <div className="mt-2 inline-flex items-center gap-2 text-sm text-slate-400">
+                    {session.location}
+                  </div>
+                  <div className="mt-1 text-xs text-slate-500">
+                    {session.courseName ? `Курс: ${session.courseName}` : ""}
                   </div>
                 </li>
               ))}
@@ -402,13 +388,13 @@ export default function SchedulePage() {
 
       {notes.length > 0 && (
         <section className="grid gap-4 md:grid-cols-2">
-          {notes.map(note => (
+          {notes.map((note) => (
             <div
               key={note.id}
               className="flex items-center justify-between rounded-2xl border border-emerald-300/30 bg-emerald-400/10 p-4 text-white"
             >
               <div>
-                <p className="text-sm text-emerald-200">{note.duration || 'Без длительности'}</p>
+                <p className="text-sm text-emerald-200">{note.duration || "Без длительности"}</p>
                 <h4 className="text-xl font-semibold">{note.title}</h4>
                 {note.location && (
                   <div className="inline-flex items-center gap-2 text-sm text-emerald-100">
@@ -424,7 +410,7 @@ export default function SchedulePage() {
                     onClick={() => openEditNote(note)}
                     className="text-cyan-300 underline hover:text-cyan-400 text-xs"
                   >
-                    Изменить
+                    Редактировать
                   </button>
                   <button
                     onClick={() => handleDeleteNote(note.id)}
@@ -439,19 +425,9 @@ export default function SchedulePage() {
         </section>
       )}
 
-      {isEventModalOpen && (
-        <EventModal
-          title={editKey ? 'Редактировать событие' : 'Добавить событие'}
-          form={eventForm}
-          setForm={setEventForm}
-          onSubmit={editKey ? handleEditEvent : handleCreateEvent}
-          onClose={closeEventModal}
-        />
-      )}
-
       {isNoteModalOpen && (
         <NoteModal
-          title={noteEditId != null ? 'Редактировать заметку' : 'Добавить заметку'}
+          title={noteEditId != null ? "Редактировать заметку" : "Добавить заметку"}
           form={noteForm}
           setForm={setNoteForm}
           onSubmit={noteEditId != null ? handleEditNote : handleCreateNote}
