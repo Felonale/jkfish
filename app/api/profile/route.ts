@@ -20,7 +20,7 @@ export async function PUT(request: Request) {
     }
 
     const { error: upsertError } = await supabase.from('students').upsert({
-      INN: innNumber,
+      inn: innNumber,
       Name: firstName,
       Last_Name: lastName,
       Middle_Name: middleName || null,
