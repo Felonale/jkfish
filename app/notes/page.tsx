@@ -231,7 +231,7 @@ function NoteCard({
   const deleteNote = async () => {
     const { error } = await supabase.from('notes').delete().eq('id', note.id);
     if (error) {
-            console.error('Ошибка удаления:', error);
+      console.error('Ошибка удаления:', error);
       return;
     }
     setConfirmDeleteOpen(false);
@@ -246,7 +246,10 @@ function NoteCard({
   }).format(new Date(note.updated_at ?? note.created_at));
 
   return (
-    <div className="rounded-xl bg-slate-800 p-4 space-y-2 shadow hover:shadow-2xl transition-transform duration-300 hover:scale-105 hover:-translate-y-1 animate-fadeInUp">
+    <div
+      className="rounded-xl bg-slate-800 p-4 space-y-2 shadow hover:shadow-2xl transition-transform duration-300 hover:scale-105 hover:-translate-y-1 animate-fadeInUp cursor-pointer"
+      onClick={() => router.push(`/notes/view?id=${note.id}`)}
+    >
       <h3 className="text-lg font-bold">{note.title}</h3>
       <p className="text-sm text-slate-300">
         {note.content ? generateDescription(note.content) : 'Описание отсутствует'}
@@ -257,7 +260,7 @@ function NoteCard({
           {note.tags.map(tag => (
             <li
               key={tag}
-              className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em] transition-transform duration-300 hover:bg-violet-400/20 hover:scale-105"
+              className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em]"
             >
               {tag}
             </li>
@@ -266,33 +269,33 @@ function NoteCard({
       )}
       <div className="flex gap-3 pt-2">
         <button
-          onClick={() => router.push(`/notes/view?id=${note.id}`)}
-          className="inline-flex items-center gap-2 text-sm text-violet-400 hover:text-violet-300 hover:scale-105 transition-transform"
-        >
-          <Eye size={16} /> Открыть
-        </button>
-        <button
-          onClick={exportMarkdown}
-          className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300 hover:scale-105 transition-transform"
+          onClick={e => {
+            e.stopPropagation();
+            exportMarkdown();
+          }}
+          className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
         >
           <FileDown size={16} /> Экспорт .md
         </button>
         <button
-          onClick={() => setConfirmDeleteOpen(true)}
-          className="inline-flex items-center gap-2 text-sm text-red-400 hover:text-red-300 hover:scale-105 transition-transform"
+          onClick={e => {
+            e.stopPropagation();
+            setConfirmDeleteOpen(true);
+          }}
+          className="inline-flex items-center gap-2 text-sm text-red-400 hover:text-red-300"
         >
           <Trash2 size={16} /> Удалить
         </button>
       </div>
 
       {confirmDeleteOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm animate-fadeInUp">
-          <div className="w-full max-w-md rounded-2xl bg-slate-900 p-6 text-white shadow-xl space-y-4 animate-scaleIn">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-slate-900 p-6 text-white shadow-xl space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-lg font-semibold">Удалить конспект?</h2>
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
-                className="text-slate-400 hover:text-white transition"
+                className="text-slate-400 hover:text-white"
                 aria-label="Закрыть"
               >
                 <X size={20} />
@@ -304,18 +307,18 @@ function NoteCard({
             <div className="flex justify-end gap-3 pt-2">
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
-                className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10 transition"
+                className="rounded-xl border border-white/20 px-4 py-2 text-sm text-white hover:bg-white/10"
               >
                 Отмена
               </button>
               <button
                 onClick={deleteNote}
-                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600 transition-transform hover:scale-105"
+                className="rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white hover:bg-red-600"
               >
                 Удалить
               </button>
             </div>
-          </div>  
+          </div>
         </div>
       )}
     </div>

@@ -3,7 +3,8 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { ArrowLeft, Trash2, FileDown, PenLine, X } from 'lucide-react';
+import { ArrowLeft, Trash2, FileDown, X } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
 
 type Note = {
   id: string;
@@ -22,10 +23,9 @@ export default function ViewNotePage() {
 
   const [note, setNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [tags, setTags] = useState<string>('');
+  const [tags, setTags] = useState('');
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
@@ -42,12 +42,31 @@ export default function ViewNotePage() {
         setNote(data);
         setTitle(data.title);
         setContent(data.content ?? '');
-        setTags(data.tags ? data.tags.join(', ') : '');
+        setTags(data.tags?.join(', ') ?? '');
       }
       setLoading(false);
     };
     fetchNote();
   }, [id, supabase]);
+
+  const saveEdit = async () => {
+    if (!note) return;
+    const updatedTags = tags
+      .split(',')
+      .map(t => t.trim())
+      .filter(t => t.length > 0);
+    const { error, data } = await supabase
+      .from('notes')
+      .update({ title, content, tags: updatedTags })
+      .eq('id', note.id)
+      .select()
+      .single();
+    if (error) {
+      console.error('Ошибка сохранения:', error);
+      return;
+    }
+    setNote(data);
+  };
 
   const exportMarkdown = () => {
     if (!note) return;
@@ -74,36 +93,16 @@ export default function ViewNotePage() {
     router.push('/notes');
   };
 
-  const saveEdit = async () => {
-    if (!note) return;
-    const updatedTags = tags
-      .split(',')
-      .map(t => t.trim())
-      .filter(t => t.length > 0);
-    const { error, data } = await supabase
-      .from('notes')
-      .update({ title, content, tags: updatedTags })
-      .eq('id', note.id)
-      .select()
-      .single();
-    if (error) {
-      console.error('Ошибка редактирования:', error);
-      return;
-    }
-    setNote(data);
-    setEditing(false);
-  };
-
   if (!id) return <p className="text-white">Нет id конспекта</p>;
   if (loading) {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {[...Array(4)].map((_, i) => (
-        <div key={i} className="skeleton h-32 w-full"></div>
-      ))}
-    </div>
-  );
-}
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {[...Array(4)].map((_, i) => (
+          <div key={i} className="skeleton h-32 w-full"></div>
+        ))}
+      </div>
+    );
+  }
   if (!note) return <p className="text-white">Конспект не найден</p>;
 
   return (
@@ -115,100 +114,56 @@ export default function ViewNotePage() {
         <ArrowLeft size={18} /> Назад
       </button>
 
-      {editing ? (
-        <div className="space-y-4">
+      <article className="space-y-4">
+        <header className="space-y-2">
           <input
             value={title}
             onChange={e => setTitle(e.target.value)}
-            placeholder="Заголовок конспекта"
-            className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400"
-          />
-          <textarea
-            value={content}
-            onChange={e => setContent(e.target.value)}
-            placeholder="Содержимое конспекта"
-            className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400"
-            rows={10}
+            onBlur={saveEdit}
+            className="w-full bg-transparent text-2xl font-bold focus:outline-none"
           />
           <input
             value={tags}
             onChange={e => setTags(e.target.value)}
+            onBlur={saveEdit}
             placeholder="Теги через запятую"
-            className="w-full rounded-xl bg-slate-800 p-3 text-white placeholder-slate-400"
+            className="w-full rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 text-sm text-slate-200 focus:outline-none"
           />
-          <div className="flex gap-3">
-            <button
-              onClick={saveEdit}
-              className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold hover:bg-violet-600"
-            >
-              Сохранить
-            </button>
-            <button
-              onClick={() => {
-                setEditing(false);
-                setTitle(note.title);
-                setContent(note.content ?? '');
-                setTags(note.tags ? note.tags.join(', ') : '');
-              }}
-              className="rounded-xl border border-white/20 px-4 py-2 text-sm hover:bg-white/10"
-            >
-              Отмена
-            </button>
-          </div>
+          <p className="text-sm text-slate-400">
+            {new Intl.DateTimeFormat('ru-RU', {
+              day: 'numeric',
+              month: 'long',
+              hour: '2-digit',
+              minute: '2-digit',
+            }).format(new Date(note.updated_at ?? note.created_at))}
+          </p>
+        </header>
+
+        <div
+          contentEditable
+          suppressContentEditableWarning
+          onInput={e => setContent((e.target as HTMLElement).innerText)}
+          onBlur={saveEdit}
+          className="prose prose-invert max-w-none focus:outline-none p-3 rounded-xl bg-slate-800 text-white"
+        >
+          <ReactMarkdown>{content}</ReactMarkdown>
         </div>
-      ) : (
-        <article className="space-y-4">
-          <header className="space-y-2">
-            <h1 className="text-2xl font-bold">{note.title}</h1>
-            <p className="text-sm text-slate-400">
-              {new Intl.DateTimeFormat('ru-RU', {
-                day: 'numeric',
-                month: 'long',
-                hour: '2-digit',
-                minute: '2-digit',
-              }).format(new Date(note.updated_at ?? note.created_at))}
-            </p>
-          </header>
 
-          <div className="text-slate-200 whitespace-pre-line">
-            {note.content ?? 'Конспект пустой.'}
-          </div>
-
-          {note.tags && note.tags.length > 0 && (
-            <ul className="flex flex-wrap gap-2 text-xs text-slate-300">
-              {note.tags.map(tag => (
-                <li
-                  key={tag}
-                  className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em]"
-                >
-                  {tag}
-                </li>
-              ))}
-            </ul>
-          )}
-
-          <div className="flex flex-wrap gap-4 pt-4">
-            <button
-              onClick={() => setEditing(true)}
-              className="inline-flex items-center gap-2 text-sm text-violet-400 hover:underline"
-            >
-              <PenLine size={16} /> Редактировать
-            </button>
-            <button
-              onClick={exportMarkdown}
-              className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:underline"
-            >
-              <FileDown size={16} /> Экспорт .md
-            </button>
-            <button
-              onClick={() => setConfirmDeleteOpen(true)}
-              className="inline-flex items-center gap-2 text-sm text-red-400 hover:underline"
-            >
-              <Trash2 size={16} /> Удалить
-            </button>
-          </div>
-        </article>
-      )}
+        <div className="flex flex-wrap gap-4 pt-4">
+          <button
+            onClick={exportMarkdown}
+            className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:underline"
+          >
+            <FileDown size={16} /> Экспорт .md
+          </button>
+          <button
+            onClick={() => setConfirmDeleteOpen(true)}
+            className="inline-flex items-center gap-2 text-sm text-red-400 hover:underline"
+          >
+            <Trash2 size={16} /> Удалить
+          </button>
+        </div>
+      </article>
 
       {confirmDeleteOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
@@ -224,8 +179,7 @@ export default function ViewNotePage() {
               </button>
             </div>
             <p className="text-sm text-slate-300">
-              Вы уверены, что хотите удалить конспект{' '}
-              <strong>«{note.title}»</strong>? Это действие необратимо.
+              Вы уверены, что хотите удалить конспект <strong>«{note.title}»</strong>? Это действие необратимо.
             </p>
             <div className="flex justify-end gap-3 pt-2">
               <button
@@ -243,8 +197,7 @@ export default function ViewNotePage() {
             </div>
           </div>
         </div>
-      )}
+      )}  
     </div>
   );
 }
-
