@@ -106,7 +106,6 @@ export default function GradesPage() {
         return;
       }
 
-      const rows = data as GradeRow[];
       const bySubject = new Map<
         number,
         {
@@ -118,6 +117,7 @@ export default function GradesPage() {
         }
       >();
 
+      const rows = data as unknown as GradeRow[];
       rows.forEach((row) => {
         const subjectId = row.enrollments?.courses?.subjects?.id;
         const subjectName = row.enrollments?.courses?.subjects?.name;
@@ -135,7 +135,10 @@ export default function GradesPage() {
 
         existing.scores.push(Number(row.score));
 
-        const isNewer = new Date(row.graded_at).getTime() > new Date(existing.last.graded_at).getTime();
+        const isNewer =
+          new Date(row.graded_at).getTime() >
+          new Date(existing.last.graded_at).getTime();
+
         if (isNewer) {
           existing.last = { score: Number(row.score), graded_at: row.graded_at };
           existing.enrollmentId = row.enrollment_id;
@@ -146,25 +149,29 @@ export default function GradesPage() {
 
       if (bySubject.size === 0) return;
 
-      const groups: GradeGroup[] = Array.from(bySubject.entries()).map(([subjectId, info]) => {
-        const avg = info.scores.reduce((s, v) => s + v, 0) / info.scores.length;
-        const percent = Math.min(Math.max(Math.round(avg), 0), 100);
-        const lastLabel = `${info.last.score} (${gradeToLetter(info.last.score)})`;
+      const groups: GradeGroup[] = Array.from(bySubject.entries()).map(
+        ([subjectId, info]) => {
+          const avg =
+            info.scores.reduce((s, v) => s + v, 0) / info.scores.length;
 
-        return {
-          id: String(info.enrollmentId),
-          subject: info.subjectName || `Дисциплина #${subjectId}`,
-          grade: gradeToLetter(avg),
-          percent,
-          description: `Оценок: ${info.scores.length}. Последняя: ${lastLabel}`,
-          updated: new Intl.DateTimeFormat("ru-RU", {
-            day: "numeric",
-            month: "long",
-            hour: "2-digit",
-            minute: "2-digit",
-          }).format(new Date(info.last.graded_at)),
-        };
-      });
+          const percent = Math.min(Math.max(Math.round(avg), 0), 100);
+          const lastLabel = `${info.last.score} (${gradeToLetter(info.last.score)})`;
+
+          return {
+            id: String(info.enrollmentId),
+            subject: info.subjectName || `Дисциплина #${subjectId}`,
+            grade: gradeToLetter(avg),
+            percent,
+            description: `Оценок: ${info.scores.length}. Последняя: ${lastLabel}`,
+            updated: new Intl.DateTimeFormat("ru-RU", {
+              day: "numeric",
+              month: "long",
+              hour: "2-digit",
+              minute: "2-digit",
+            }).format(new Date(info.last.graded_at)),
+          };
+        }
+      );
 
       setGradeGroups(groups);
     };
@@ -174,7 +181,9 @@ export default function GradesPage() {
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
-      const offset = direction === "right" ? CARD_WIDTH + GAP : -(CARD_WIDTH + GAP);
+      const offset =
+        direction === "right" ? CARD_WIDTH + GAP : -(CARD_WIDTH + GAP);
+
       scrollRef.current.scrollBy({
         left: offset,
         behavior: "smooth",
@@ -184,13 +193,17 @@ export default function GradesPage() {
 
   return (
     <div className="space-y-8">
+      {/* HEADER */}
       <header className="flex flex-wrap justify-between gap-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
         <div>
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-300">Прогресс обучения</p>
+          <p className="text-xs uppercase tracking-[0.35em] text-slate-300">
+            Прогресс обучения
+          </p>
           <h2 className="mt-2 text-3xl font-semibold">
             Динамика оценок по предметам, данные из Supabase.
           </h2>
         </div>
+
         <div className="flex flex-col gap-2 sm:flex-row">
           <button
             type="button"
@@ -198,6 +211,7 @@ export default function GradesPage() {
           >
             Обновить Supabase
           </button>
+
           <Link
             href="/notes"
             className="rounded-2xl border border-white/20 px-4 py-2 text-sm font-semibold text-white"
@@ -205,8 +219,9 @@ export default function GradesPage() {
             Перейти к заметкам
           </Link>
         </div>
-      </header>  
-      
+      </header>
+
+      {/* КАРУСЕЛЬ */}
       <div className="relative flex items-center h-[300px]">
         <div className="absolute left-0 z-20 flex items-center h-full px-4">
           <button
@@ -259,12 +274,17 @@ export default function GradesPage() {
         </div>
       </div>
 
+      {/* СЕКЦИЯ РАЗБИВКИ */}
       <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <h3 className="text-2xl font-semibold">Разбивка по активностям</h3>
-            <span className="text-sm text-slate-400">Пример таблицы нагрузки — заменить на реальные данные из grades_breakdown</span>
+            <span className="text-sm text-slate-400">
+              Пример таблицы нагрузки — заменить на реальные данные из
+              grades_breakdown
+            </span>
           </div>
+
           <Link
             href="/notes"
             className="inline-flex items-center gap-2 text-sm font-semibold text-violet-200"
@@ -273,9 +293,11 @@ export default function GradesPage() {
             <ArrowRight size={16} />
           </Link>
         </div>
-        
+
+        {/* ГРАФИК */}
         <GradesChart />
 
+        {/* ТАБЛИЦА */}
         <div className="overflow-hidden rounded-2xl border border-white/10">
           <table className="w-full border-collapse text-left text-sm text-slate-100">
             <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-slate-300">
@@ -287,16 +309,21 @@ export default function GradesPage() {
                 <th className="px-4 py-3">Дедлайн</th>
               </tr>
             </thead>
+
             <tbody>
               {breakdownRows.map((row) => (
                 <tr key={row.title} className="odd:bg-white/5">
-                  <td className="px-4 py-3 font-medium text-white">{row.title}</td>
+                  <td className="px-4 py-3 font-medium text-white">
+                    {row.title}
+                  </td>
                   <td className="px-4 py-3 text-slate-300">{row.weight}</td>
+
                   <td className="px-4 py-3">
                     <span className="rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100">
                       {row.status}
                     </span>
                   </td>
+
                   <td className="px-4 py-3 text-slate-300">{row.score}</td>
                   <td className="px-4 py-3 text-slate-300">{row.due}</td>
                 </tr>

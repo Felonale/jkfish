@@ -11,15 +11,16 @@ import {
   Legend,
 } from "chart.js";
 import { useState } from "react";
+import { useRouter } from "next/navigation"; // для перехода
 
 ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Tooltip, Legend);
 
-// Типы для дисциплин
 type DisciplineKey = "math" | "physics" | "programming" | "operating-systems";
 
 interface GradePoint {
   date: string;
   grade: number;
+  assignmentId?: string; // добавляем ID задания
 }
 
 interface Discipline {
@@ -31,45 +32,45 @@ const disciplines: Record<DisciplineKey, Discipline> = {
   math: {
     label: "Математика для инженеров",
     data: [
-      { date: "01 дек", grade: 65 },
-      { date: "02 дек", grade: 90 },
-      { date: "03 дек", grade: 70 },
-      { date: "04 дек", grade: 85 },
-      { date: "05 дек", grade: 90 },
-      { date: "06 дек", grade: 100 },
+      { date: "01 дек", grade: 65, assignmentId: "a1" },
+      { date: "02 дек", grade: 90, assignmentId: "a2" },
+      { date: "03 дек", grade: 70, assignmentId: "a3" },
+      { date: "04 дек", grade: 85, assignmentId: "a4" },
+      { date: "05 дек", grade: 90, assignmentId: "a5" },
+      { date: "06 дек", grade: 100, assignmentId: "a6" },
     ],
   },
   physics: {
     label: "Физика и моделирование",
     data: [
-      { date: "01 дек", grade: 80 },
-      { date: "02 дек", grade: 60 },
-      { date: "03 дек", grade: 90 },
-      { date: "04 дек", grade: 85 },
-      { date: "05 дек", grade: 90 },
-      { date: "06 дек", grade: 92 },
+      { date: "01 дек", grade: 80, assignmentId: "b1" },
+      { date: "02 дек", grade: 60, assignmentId: "b2" },
+      { date: "03 дек", grade: 90, assignmentId: "b3" },
+      { date: "04 дек", grade: 85, assignmentId: "b4" },
+      { date: "05 дек", grade: 90, assignmentId: "b5" },
+      { date: "06 дек", grade: 92, assignmentId: "b6" },
     ],
   },
   programming: {
     label: "Fullstack‑разработка",
     data: [
-      { date: "01 дек", grade: 100 },
-      { date: "02 дек", grade: 85 },
-      { date: "03 дек", grade: 100 },
-      { date: "04 дек", grade: 85 },
-      { date: "05 дек", grade: 90 },
-      { date: "06 дек", grade: 90},
+      { date: "01 дек", grade: 100, assignmentId: "c1" },
+      { date: "02 дек", grade: 85, assignmentId: "c2" },
+      { date: "03 дек", grade: 100, assignmentId: "c3" },
+      { date: "04 дек", grade: 85, assignmentId: "c4" },
+      { date: "05 дек", grade: 90, assignmentId: "c5" },
+      { date: "06 дек", grade: 90, assignmentId: "c6"},
     ],
   },
     "operating-systems": {
     label: "Операционные системы",
     data: [
-      { date: "01 дек", grade: 75 },
-      { date: "02 дек", grade: 80 },
-      { date: "03 дек", grade: 85 },
-      { date: "04 дек", grade: 20 },
-      { date: "05 дек", grade: 90 },
-      { date: "06 дек", grade: 92 },
+      { date: "01 дек", grade: 75, assignmentId: "d1"},
+      { date: "02 дек", grade: 80, assignmentId: "d2" },
+      { date: "03 дек", grade: 85, assignmentId: "d3" },
+      { date: "04 дек", grade: 20, assignmentId: "d4" },
+      { date: "05 дек", grade: 90, assignmentId: "d5" },
+      { date: "06 дек", grade: 92, assignmentId: "d6" },
     ],
   },
 };
@@ -77,16 +78,17 @@ const disciplines: Record<DisciplineKey, Discipline> = {
 export default function GradesChart() {
   const [selected, setSelected] = useState<DisciplineKey>("math");
   const dataset: GradePoint[] = disciplines[selected].data;
+  const router = useRouter();
 
   const data = {
-    labels: dataset.map((d: GradePoint) => d.date),
+    labels: dataset.map((d) => d.date),
     datasets: [
       {
         label: disciplines[selected].label,
-        data: dataset.map((d: GradePoint) => d.grade),
-        borderColor: "#8b5cf6", // фиолетовый
+        data: dataset.map((d) => d.grade),
+        borderColor: "#8b5cf6",
         backgroundColor: "#8b5cf6",
-        pointBackgroundColor: "#22d3ee", // бирюзовые точки
+        pointBackgroundColor: "#22d3ee",
         tension: 0.3,
       },
     ],
@@ -95,9 +97,7 @@ export default function GradesChart() {
   const options = {
     responsive: true,
     plugins: {
-      legend: {
-        labels: { color: "#e5e7eb" },
-      },
+      legend: { labels: { color: "#e5e7eb" } },
       tooltip: {
         backgroundColor: "#1f2937",
         titleColor: "#fff",
@@ -105,16 +105,16 @@ export default function GradesChart() {
       },
     },
     scales: {
-      x: {
-        ticks: { color: "#cbd5e1" },
-        grid: { color: "#334155" },
-      },
-      y: {
-        ticks: { color: "#cbd5e1" },
-        grid: { color: "#334155" },
-        min: 0,
-        max: 100,
-      },
+      x: { ticks: { color: "#cbd5e1" }, grid: { color: "#334155" } },
+      y: { ticks: { color: "#cbd5e1" }, grid: { color: "#334155" }, min: 0, max: 100 },
+    },
+    onClick: (event: any, elements: any) => {
+      if (!elements.length) return;
+      const index = elements[0].index; // индекс точки
+      const assignmentId = dataset[index].assignmentId;
+      if (assignmentId) {
+        router.push(`/tasks?id=${assignmentId}`);
+      }
     },
   };
 
@@ -123,7 +123,7 @@ export default function GradesChart() {
       <div className="mb-4">
         <select
           value={selected}
-          onChange={e => setSelected(e.target.value as DisciplineKey)}
+          onChange={(e) => setSelected(e.target.value as DisciplineKey)}
           className="rounded-lg bg-violet-600 px-3 py-2 text-white"
         >
           {Object.keys(disciplines).map((key) => (
