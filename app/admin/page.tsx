@@ -208,7 +208,7 @@ export default function AdminPage() {
     const groupOptionsFromTable = (grp ?? []).map((g) => ({ id: g.id, label: g.name }));
     const termOptionsFromTable = (trm ?? []).map((t) => ({ id: t.id, label: t.name }));
 
-    const coursesData = (crs ?? []) as CourseRow[];
+    const coursesData = (crs ?? []) as unknown as CourseRow[];
     const groupOptionsFromCourses = coursesData.map((c) => ({
       id: c.group_id,
       label: c.study_groups?.name ?? `Группа ${c.group_id}`,

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -79,6 +80,7 @@ const breakdownRows = [
 ];
 
 export default function GradesPage() {
+  const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const CARD_WIDTH = 320;
   const GAP = 16;
@@ -88,6 +90,21 @@ export default function GradesPage() {
     const supabase = createClient();
 
     const load = async () => {
+      // Если преподаватель или суперадмин — отправляем в их версию страницы
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const [{ data: teacherRow }, { data: superRow }] = await Promise.all([
+          supabase.from("teachers").select("id").eq("user_id", user.id).maybeSingle(),
+          supabase.from("superadmins").select("user_id").eq("user_id", user.id).maybeSingle(),
+        ]);
+        if (teacherRow || superRow) {
+          router.replace("/teacher/grades");
+          return;
+        }
+      }
+
       const { data, error } = await supabase
         .from("grades")
         .select(
@@ -177,7 +194,7 @@ export default function GradesPage() {
     };
 
     load();
-  }, []);
+  }, [router]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {

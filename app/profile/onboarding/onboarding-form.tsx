@@ -1,28 +1,28 @@
 'use client';
 
-import type { ChangeEvent, FormEvent } from 'react';
+import type { FormEvent } from 'react';
 import { useState } from 'react';
-import { Loader2, Save } from 'lucide-react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { ArrowLeft, Loader2, Save, Sparkles } from 'lucide-react';
 
-type ProfileFormProps = {
-  initialData: {
-    inn: string;
-    firstName: string;
-    lastName: string;
-    middleName: string;
-    groupName: string;
-    city: string;
-    courseName: string;
-  };
-};
+import { createClient } from '@/lib/supabase/client';
 
-export function ProfileForm({ initialData }: ProfileFormProps) {
-  const [form, setForm] = useState(initialData);
+export default function OnboardingForm() {
+  const router = useRouter();
+  const supabase = createClient();
+
+  const [form, setForm] = useState({
+    inn: '',
+    firstName: '',
+    lastName: '',
+    middleName: '',
+  });
   const [pending, setPending] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const handleChange =
-    (field: keyof typeof form) => (event: ChangeEvent<HTMLInputElement>) => {
+    (field: keyof typeof form) => (event: React.ChangeEvent<HTMLInputElement>) => {
       setForm(prev => ({ ...prev, [field]: event.target.value }));
     };
 
@@ -31,20 +31,51 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
     setPending(true);
     setMessage(null);
 
+    const innNumber = Number(form.inn);
+    if (!Number.isFinite(innNumber) || innNumber <= 0) {
+      setMessage('Введите корректный ИИН (только цифры).');
+      setPending(false);
+      return;
+    }
+
     try {
-      const response = await fetch('/api/profile', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
 
-      const payload = await response.json().catch(() => ({}));
-
-      if (!response.ok) {
-        throw new Error(payload?.error ?? 'Не удалось сохранить профиль');
+      if (!user) {
+        setMessage('Сначала войдите в аккаунт, чтобы сохранить данные.');
+        setPending(false);
+        return;
       }
 
-      setMessage('Данные сохранены. Перейдите в профиль, чтобы увидеть изменения.');
+      const { error: upsertError } = await supabase.from('students').upsert(
+        {
+          inn: innNumber,
+          Name: form.firstName.trim(),
+          Last_Name: form.lastName.trim(),
+          Middle_Name: form.middleName.trim() ? form.middleName.trim() : null,
+        },
+        { onConflict: 'inn' },
+      );
+
+      if (upsertError) throw upsertError;
+
+      const fullName = `${form.firstName.trim()} ${form.lastName.trim()}${
+        form.middleName.trim() ? ` ${form.middleName.trim()}` : ''
+      }`;
+
+      const { error: updateError } = await supabase.auth.updateUser({
+        data: {
+          student_inn: innNumber,
+          full_name: fullName,
+        },
+      });
+      if (updateError) throw updateError;
+
+      setMessage('Данные сохранены. Перенаправляем в профиль…');
+      router.push('/profile');
+      router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Не удалось сохранить данные');
     } finally {
@@ -53,17 +84,26 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
   };
 
   return (
-    <section className="rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h2 className="text-2xl font-semibold">Данные студента</h2>
-          <p className="text-sm text-slate-400">
-            Основные поля сохраняются в таблицу <span className="font-mono">students</span>, а группа/город/курс — в метаданные пользователя.
-          </p>
+    <div className="mx-auto max-w-2xl space-y-6 rounded-3xl border border-white/10 bg-white/5 p-8 text-white">
+      <div className="flex items-center justify-between">
+        <Link href="/profile" className="inline-flex items-center gap-2 text-sm text-violet-200">
+          <ArrowLeft size={16} />
+          Назад к профилю
+        </Link>
+        <div className="inline-flex items-center gap-2 text-xs uppercase tracking-[0.25em] text-slate-400">
+          <Sparkles size={14} />
+          Настройка студента
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-4 md:grid-cols-2">
+      <div>
+        <h1 className="text-3xl font-semibold">Добавьте данные о себе</h1>
+        <p className="text-sm text-slate-400">
+          Это нужно, чтобы привязать ваш аккаунт к учебным данным. Позже вы сможете изменить эти поля в профиле.
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="grid gap-4 md:grid-cols-2">
         <label className="flex flex-col gap-2 text-sm text-slate-200 md:col-span-2">
           ИИН
           <input
@@ -112,39 +152,6 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           />
         </label>
 
-        <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Группа
-          <input
-            type="text"
-            value={form.groupName}
-            onChange={handleChange('groupName')}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="ИТ-21"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm text-slate-200">
-          Город
-          <input
-            type="text"
-            value={form.city}
-            onChange={handleChange('city')}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="Алматы"
-          />
-        </label>
-
-        <label className="flex flex-col gap-2 text-sm text-slate-200 md:col-span-2">
-          Название курса
-          <input
-            type="text"
-            value={form.courseName}
-            onChange={handleChange('courseName')}
-            className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-slate-500"
-            placeholder="Вычислительная техника и программное обеспечение"
-          />
-        </label>
-
         <div className="md:col-span-2 flex flex-col gap-3">
           <button
             type="submit"
@@ -166,7 +173,7 @@ export function ProfileForm({ initialData }: ProfileFormProps) {
           {message && <p className="text-sm text-slate-200">{message}</p>}
         </div>
       </form>
-    </section>
+    </div>
   );
 }
 

@@ -79,7 +79,7 @@ export default function GradesInsightsPage() {
       return;
     }
 
-    const rows = data as GradeRow[];
+    const rows = (data ?? []) as unknown as GradeRow[];
     const grouped = new Map<number, SubjectGroup>();
 
     rows.forEach((row) => {

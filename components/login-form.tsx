@@ -41,23 +41,37 @@ export function LoginForm({
 
       const { data: userData } = await supabase.auth.getUser();
       const user = userData?.user;
-      const studentInn = user?.user_metadata?.student_inn;
 
-      let studentExists = false;
-
-      if (studentInn) {
-        const { data: studentRows, error: studentError } = await supabase
-          .from("students")
-          .select("INN")
-          .eq("INN", studentInn)
-          .limit(1);
-
-        if (!studentError && studentRows && studentRows.length > 0) {
-          studentExists = true;
-        }
+      if (!user) {
+        router.push("/auth/login");
+        return;
       }
 
-      if (!studentInn || !studentExists) {
+      const [{ data: student }, { data: teacher }, { data: superadmin }] =
+        await Promise.all([
+          supabase
+            .from("students")
+            .select("inn")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("teachers")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("superadmins")
+            .select("user_id")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+        ]);
+
+      if (teacher || superadmin) {
+        router.push("/profile");
+        return;
+      }
+
+      if (!student) {
         router.push("/profile/onboarding");
         return;
       }

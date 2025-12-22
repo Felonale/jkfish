@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
 
 type Assignment = {
   id: string;
@@ -31,14 +32,30 @@ export default function TasksPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [role, setRole] = useState<"student" | "teacher">("student");
   const router = useRouter();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     (async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const [{ data: teacherRow }, { data: superRow }] = await Promise.all([
+          supabase.from("teachers").select("id").eq("user_id", user.id).maybeSingle(),
+          supabase.from("superadmins").select("user_id").eq("user_id", user.id).maybeSingle(),
+        ]);
+        if (teacherRow || superRow) {
+          router.replace("/teacher/tasks");
+          return;
+        }
+      }
+
       const res = await fetch("/api/tasks");
       const data = await res.json();
       setAssignments(data);
     })();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   // учитель создаёт задание
   const createTask = async (title: string, description: string, deadline?: string) => {

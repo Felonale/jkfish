@@ -34,7 +34,16 @@ const navItems: NavItem[] = [
   { href: "/notes", label: "Заметки", icon: NotebookPen, requiresAuth: true },
   { href: "/profile", label: "Профиль", icon: User2, requiresAuth: true },
   { href: "/admin", label: "Admin", icon: Shield, requiresAuth: true, requiresAdmin: true },
-  { href: "/auth/login", label: "Войти", icon: LogIn, hideWhenAuthed: true },
+  { href: "/auth/login", label: "Вход", icon: LogIn, hideWhenAuthed: true },
+];
+
+const teacherNavItems: NavItem[] = [
+  { href: "/teacher", label: "Главная (преп.)", icon: HomeIcon, requiresAuth: true },
+  { href: "/teacher/grades", label: "Оценки (преп.)", icon: ChartPie, requiresAuth: true },
+  { href: "/teacher/schedule", label: "Занятия (преп.)", icon: CalendarClock, requiresAuth: true },
+  { href: "/teacher/tasks", label: "Задания (преп.)", icon: BookOpenCheck, requiresAuth: true },
+  { href: "/teacher/notes", label: "Заметки (преп.)", icon: NotebookPen, requiresAuth: true },
+  { href: "/teacher/profile", label: "Профиль (преп.)", icon: User2, requiresAuth: true },
 ];
 
 export default function Sidebar() {
@@ -84,7 +93,7 @@ export default function Sidebar() {
 
       if (teacherRow) {
         setTeacherName(
-          [teacherRow.last_name, teacherRow.first_name, teacherRow.middle_name].filter(Boolean).join(" ")
+          [teacherRow.last_name, teacherRow.first_name, teacherRow.middle_name].filter(Boolean).join(" "),
         );
       } else {
         setTeacherName(null);
@@ -115,18 +124,35 @@ export default function Sidebar() {
     return () => listener?.subscription.unsubscribe();
   }, []);
 
+  const showGeneral = !isTeacher || isAdmin; // для преподавателя скрываем «Основное», но админ видит оба блока
+  const showTeacher = isTeacher || isAdmin;
+
+  const isActivePath = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href === "/teacher") return pathname === "/teacher";
+    return pathname === href || pathname.startsWith(href + "/");
+  };
+
   const itemsToRender = useMemo(
     () =>
-      navItems.filter((item) => {
-        if (item.hideWhenAuthed && isAuthed) return false;
-        if (item.requiresAuth && !isAuthed) return false;
-        if (item.requiresAdmin && !(isAdmin || isTeacher)) return false;
-        return true;
-      }),
-    [isAuthed, isAdmin, isTeacher]
+      showGeneral
+        ? navItems.filter((item) => {
+            if (item.hideWhenAuthed && isAuthed) return false;
+            if (item.requiresAuth && !isAuthed) return false;
+            if (item.requiresAdmin && !(isAdmin || isTeacher)) return false;
+            return true;
+          })
+        : [],
+    [isAuthed, isAdmin, isTeacher, showGeneral],
   );
 
-  const roleLabel = isAdmin ? "Суперадмин" : isTeacher ? "Преподаватель" : studentName ? "Студент" : "";
+  const roleLabel = isAdmin
+    ? "Суперадмин"
+    : isTeacher
+      ? "Преподаватель"
+      : studentName
+        ? "Студент"
+        : "";
   const displayName = teacherName || studentName || userEmail || "Пользователь";
 
   return (
@@ -163,59 +189,116 @@ export default function Sidebar() {
           "
         >
           <strong className="block text-lg">JKFish Academy</strong>
-          <span className="text-sm text-slate-400">Учебный портал · 2025</span>
+          <span className="text-sm text-slate-400">обучение • 2025</span>
         </div>
       </div>
 
       <nav className="flex-1">
-        <p
-          className="
-            text-xs uppercase tracking-[0.3em] text-slate-500
-            opacity-0 -translate-x-2
-            group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
-            transition-all duration-200
-          "
-        >
-          Навигация
-        </p>
-        <ul className="mt-4 space-y-2">
-          {itemsToRender.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
+        {showGeneral && (
+          <>
+            <p
+              className="
+                text-xs uppercase tracking-[0.3em] text-slate-500
+                opacity-0 -translate-x-2
+                group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
+                transition-all duration-200
+              "
+            >
+              Основное
+            </p>
+            <ul className="mt-4 space-y-2">
+              {itemsToRender.map((item) => {
+                const Icon = item.icon;
+                const isActive = isActivePath(item.href);
 
-            return (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`
-                    flex items-center gap-3
-                    rounded-xl border border-transparent
-                    px-2.5 py-2
-                    text-sm
-                    transition
-                    ${
-                      isActive
-                        ? "border-violet-400/40 bg-violet-400/10 text-white"
-                        : "text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white"
-                    }
-                  `}
-                >
-                  <Icon size={18} className="shrink-0" />
-                  <span
-                    className="
-                      whitespace-nowrap
-                      opacity-0 -translate-x-2
-                      group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
-                      transition-all duration-200
-                    "
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`
+                        flex items-center gap-3
+                        rounded-xl border border-transparent
+                        px-2.5 py-2
+                        text-sm
+                        transition
+                        ${
+                          isActive
+                            ? "border-violet-400/40 bg-violet-400/10 text-white"
+                            : "text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white"
+                        }
+                      `}
+                    >
+                      <Icon size={18} className="shrink-0" />
+                      <span
+                        className="
+                          whitespace-nowrap
+                          opacity-0 -translate-x-2
+                          group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
+                          transition-all duration-200
+                        "
+                      >
+                        {item.label}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
+
+        {showTeacher && (
+          <>
+            <p
+              className="
+                mt-6
+                text-xs uppercase tracking-[0.3em] text-slate-500
+                opacity-0 -translate-x-2
+                group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
+                transition-all duration-200
+              "
+            >
+              Для преподавателя
+            </p>
+            <ul className="mt-3 space-y-2">
+              {teacherNavItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = isActivePath(item.href);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`
+                        flex items-center gap-3
+                        rounded-xl border border-transparent
+                        px-2.5 py-2
+                        text-sm
+                        transition
+                        ${
+                          isActive
+                            ? "border-emerald-400/40 bg-emerald-400/10 text-white"
+                            : "text-slate-400 hover:border-white/10 hover:bg-white/5 hover:text-white"
+                        }
+                      `}
+                    >
+                      <Icon size={18} className="shrink-0" />
+                      <span
+                        className="
+                          whitespace-nowrap
+                          opacity-0 -translate-x-2
+                          group-hover/sidebar:opacity-100 group-hover/sidebar:translate-x-0
+                          transition-all duration-200
+                        "
+                      >
+                        {item.label}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </>
+        )}
       </nav>
 
       {isAuthed && (
@@ -227,7 +310,7 @@ export default function Sidebar() {
               transition-all duration-200
             "
           >
-            <p className="text-xs text-slate-300">{roleLabel || "Авторизован"}</p>
+            <p className="text-xs text-slate-300">{roleLabel || "Пользователь"}</p>
             <p className="truncate text-sm font-semibold text-white">{displayName}</p>
             {userEmail && <p className="truncate text-[10px] text-slate-400">{userEmail}</p>}
           </div>

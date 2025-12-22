@@ -9,22 +9,34 @@ export async function PUT(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Необходима авторизация' }, { status: 401 });
+      return NextResponse.json({ error: 'Сначала войдите в аккаунт.' }, { status: 401 });
     }
 
-    const { inn, firstName, lastName, middleName, groupName, city, courseName } = await request.json();
-    const innNumber = Number(inn);
+    const body = await request.json();
+    const innNumber = Number(body?.inn);
+    const firstName = String(body?.firstName ?? '').trim();
+    const lastName = String(body?.lastName ?? '').trim();
+    const middleName = String(body?.middleName ?? '').trim();
+    const groupName = String(body?.groupName ?? '').trim();
+    const city = String(body?.city ?? '').trim();
+    const courseName = String(body?.courseName ?? '').trim();
 
-    if (!innNumber || !firstName || !lastName) {
-      return NextResponse.json({ error: 'Заполните ИНН, имя и фамилию' }, { status: 400 });
+    if (!Number.isFinite(innNumber) || innNumber <= 0 || !firstName || !lastName) {
+      return NextResponse.json(
+        { error: 'Заполните ИИН, имя и фамилию.' },
+        { status: 400 },
+      );
     }
 
-    const { error: upsertError } = await supabase.from('students').upsert({
-      inn: innNumber,
-      Name: firstName,
-      Last_Name: lastName,
-      Middle_Name: middleName || null,
-    });
+    const { error: upsertError } = await supabase.from('students').upsert(
+      {
+        inn: innNumber,
+        Name: firstName,
+        Last_Name: lastName,
+        Middle_Name: middleName ? middleName : null,
+      },
+      { onConflict: 'inn' },
+    );
 
     if (upsertError) {
       return NextResponse.json({ error: upsertError.message }, { status: 400 });
@@ -36,9 +48,9 @@ export async function PUT(request: Request) {
       data: {
         student_inn: innNumber,
         full_name: fullName,
-        group_name: groupName ?? '',
-        city: city ?? '',
-        course_name: courseName ?? '',
+        group_name: groupName,
+        city,
+        course_name: courseName,
       },
     });
 
@@ -50,8 +62,9 @@ export async function PUT(request: Request) {
   } catch (error) {
     console.error('profile update error', error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Не удалось обновить профиль' },
+      { error: error instanceof Error ? error.message : 'Не удалось сохранить профиль.' },
       { status: 500 },
     );
   }
 }
+

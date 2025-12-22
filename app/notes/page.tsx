@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
 import { Eye, Trash2, FileDown, X } from 'lucide-react';
@@ -15,7 +15,7 @@ type Note = {
 };
 
 export default function NotesPage() {
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
 
   const [notes, setNotes] = useState<Note[]>([]);
@@ -26,6 +26,20 @@ export default function NotesPage() {
 
   useEffect(() => {
     const fetchNotes = async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (user) {
+        const [{ data: teacherRow }, { data: superRow }] = await Promise.all([
+          supabase.from('teachers').select('id').eq('user_id', user.id).maybeSingle(),
+          supabase.from('superadmins').select('user_id').eq('user_id', user.id).maybeSingle(),
+        ]);
+        if (teacherRow || superRow) {
+          router.replace('/teacher/notes');
+          return;
+        }
+      }
+
       setLoading(true);
       const { data, error } = await supabase
         .from('notes')
@@ -36,7 +50,8 @@ export default function NotesPage() {
       setLoading(false);
     };
     fetchNotes();
-  }, [supabase]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router]);
 
   const generateDescription = (text: string) => {
     const sentences = text.match(/[^.!?]+[.!?]/g);

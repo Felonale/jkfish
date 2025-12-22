@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Clock3, MapPin, RefreshCw, X } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 type Session = {
@@ -152,6 +153,7 @@ const getDayLabel = (date: string) => {
 
 export default function SchedulePage() {
   const supabase = useMemo(() => createClient(), []);
+  const router = useRouter();
 
   const [weekSchedule, setWeekSchedule] = useState<DaySchedule[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
@@ -200,6 +202,16 @@ export default function SchedulePage() {
       return;
     }
 
+    const [{ data: teacherRow }, { data: superRow }] = await Promise.all([
+      supabase.from("teachers").select("id").eq("user_id", user.id).maybeSingle(),
+      supabase.from("superadmins").select("user_id").eq("user_id", user.id).maybeSingle(),
+    ]);
+    if (teacherRow || superRow) {
+      router.replace("/teacher/schedule");
+      setLoading(false);
+      return;
+    }
+
     const { data: studentRow } = await supabase
       .from("students")
       .select("inn")
@@ -229,7 +241,7 @@ export default function SchedulePage() {
       if (sessionErr) setError(sessionErr.message);
 
       sessions =
-        sessionRows?.map((row) => {
+        sessionRows?.map((row: any) => {
           const dayLabel = getDayLabel(row.starts_at);
           const time = new Date(row.starts_at).toLocaleTimeString("ru-RU", {
             hour: "2-digit",
