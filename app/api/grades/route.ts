@@ -4,10 +4,21 @@ import { store } from "@/lib/store";
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const studentId = searchParams.get("studentId");
-  if (!studentId) {
-    return NextResponse.json({ error: "studentId обязателен" }, { status: 400 });
+  const assignmentId = searchParams.get("assignmentId");
+
+  if (studentId && assignmentId) {
+    return NextResponse.json(store.getGrade(studentId, assignmentId) ?? null);
   }
-  return NextResponse.json(store.getGrades(studentId));
+
+  if (assignmentId) {
+    return NextResponse.json(store.getGradesByAssignment(assignmentId));
+  }
+
+  if (studentId) {
+    return NextResponse.json(store.getGrades(studentId));
+  }
+
+  return NextResponse.json({ error: "studentId или assignmentId обязателен" }, { status: 400 });
 }
 
 export async function POST(req: Request) {

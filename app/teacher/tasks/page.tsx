@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation';
 
 import { createClient } from '@/lib/supabase/server';
+import TeacherTasksClient from './TeacherTasksClient';
 
 async function requireTeacher() {
   const supabase = await createClient();
@@ -19,13 +20,6 @@ async function requireTeacher() {
 export default async function TeacherTasksPage() {
   await requireTeacher();
 
-  return (
-    <div className="space-y-4 text-white">
-      <h1 className="text-3xl font-semibold">Задания (версия для преподавателя)</h1>
-      <p className="text-slate-300">
-        Здесь можно будет создавать и проверять задания студентов. Сейчас — заглушка для преподавателей.
-      </p>
-    </div>
-  );
+  return <TeacherTasksClient />;
 }
 

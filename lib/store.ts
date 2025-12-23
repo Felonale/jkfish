@@ -4,14 +4,19 @@ export type Assignment = {
   id: string;
   title: string;
   description: string;
+  assignedDate?: string;
   deadline?: string;
+  attachments?: Attachment[];
 };
 
 export type Submission = {
   id: string;
   assignmentId: string;
   studentId: string;
+  studentName?: string;
+  description?: string;
   fileUrl: string;
+  attachments?: Attachment[];
   submittedAt: string;
 };
 
@@ -24,17 +29,29 @@ export type Grade = {
   gradedAt: string;
 };
 
+export type Attachment = {
+  name: string;
+  url: string;
+  type?: string;
+  size?: number;
+};
+
 // Типы для создания
 export type AssignmentCreate = {
   title: string;
   description: string;
+  assignedDate?: string;
   deadline?: string;
+  attachments?: Attachment[];
 };
 
 export type SubmissionCreate = {
   assignmentId: string;
   studentId: string;
+  studentName?: string;
+  description?: string;
   fileUrl: string;
+  attachments?: Attachment[];
 };
 
 export type GradeCreate = {
@@ -55,12 +72,14 @@ class Store {
   }
 
   // Создать новое задание
-  createAssignment({ title, description, deadline }: AssignmentCreate): Assignment {
+  createAssignment({ title, description, assignedDate, deadline, attachments }: AssignmentCreate): Assignment {
     const a: Assignment = {
       id: Date.now().toString(),
       title,
       description,
+      assignedDate,
       deadline,
+      attachments,
     };
     this._assignments.push(a);
     return a;
@@ -77,7 +96,10 @@ class Store {
       id: Date.now().toString(),
       assignmentId: s.assignmentId,
       studentId: s.studentId,
+      studentName: s.studentName,
+      description: s.description,
       fileUrl: s.fileUrl,
+      attachments: s.attachments,
       submittedAt: new Date().toISOString(),
     };
     this._submissions.push(sub);
@@ -86,13 +108,25 @@ class Store {
 
   // Поставить оценку
   setGrade(g: GradeCreate): Grade {
+    const existing = this._grades.find(
+      (grade) => grade.assignmentId === g.assignmentId && grade.studentId === g.studentId
+    );
+    const now = new Date().toISOString();
+
+    if (existing) {
+      existing.score = g.score;
+      existing.comment = g.comment;
+      existing.gradedAt = now;
+      return existing;
+    }
+
     const grade: Grade = {
       id: Date.now().toString(),
       assignmentId: g.assignmentId,
       studentId: g.studentId,
       score: g.score,
       comment: g.comment,
-      gradedAt: new Date().toISOString(),
+      gradedAt: now,
     };
     this._grades.push(grade);
     return grade;
@@ -101,6 +135,21 @@ class Store {
   // Получить все оценки студента
   getGrades(studentId: string): Grade[] {
     return this._grades.filter((g) => g.studentId === studentId);
+  }
+
+  // Получить список отправок
+  getSubmissions({
+    assignmentId,
+    studentId,
+  }: {
+    assignmentId?: string;
+    studentId?: string;
+  }): Submission[] {
+    return this._submissions.filter((s) => {
+      if (assignmentId && s.assignmentId !== assignmentId) return false;
+      if (studentId && s.studentId !== studentId) return false;
+      return true;
+    });
   }
 
   // Получить отправку студента по заданию
@@ -115,6 +164,11 @@ class Store {
     return this._grades.find(
       (g) => g.studentId === studentId && g.assignmentId === assignmentId
     );
+  }
+
+  // Получить оценки по заданию
+  getGradesByAssignment(assignmentId: string): Grade[] {
+    return this._grades.filter((g) => g.assignmentId === assignmentId);
   }
 }
 
