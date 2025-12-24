@@ -1,523 +1,280 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { UploadCloud } from "lucide-react";
+
 import { createClient } from "@/lib/supabase/client";
 
-type Attachment = {
-  name: string;
-  url: string;
-  type?: string;
-  size?: number;
-};
-
-type Assignment = {
+type Task = {
   id: string;
   title: string;
   description: string;
-  assignedDate?: string;
-  deadline?: string;
-  attachments?: Attachment[];
+  deadline: string | null;
+  file_path: string | null;
+  file_url?: string | null;
+  created_at: string;
 };
 
 type Submission = {
   id: string;
-  assignmentId: string;
-  studentId: string;
-  studentName?: string;
-  description?: string;
-  fileUrl: string;
-  attachments?: Attachment[];
-  submittedAt: string;
-};
-
-type Grade = {
-  id: string;
-  assignmentId: string;
-  studentId: string;
-  score: number;
-  comment?: string;
-  gradedAt: string;
-};
-
-type GradeDraft = {
-  score: string;
-  comment: string;
-  isSaving: boolean;
-};
-
-const readFiles = async (files: FileList | null): Promise<Attachment[]> => {
-  if (!files || files.length === 0) return [];
-  const items = Array.from(files);
-  const results = await Promise.all(
-    items.map(
-      (file) =>
-        new Promise<Attachment>((resolve) => {
-          const reader = new FileReader();
-          reader.onload = () => {
-            resolve({
-              name: file.name,
-              url: String(reader.result || ""),
-              type: file.type,
-              size: file.size,
-            });
-          };
-          reader.readAsDataURL(file);
-        })
-    )
-  );
-  return results;
-};
-
-const toLocaleDate = (value?: string) => {
-  if (!value) return "—";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat("ru-RU").format(date);
-};
-
-const gradeColorClass = (score: number) => {
-  if (score <= 50) return "text-red-400";
-  if (score <= 69) return "text-orange-400";
-  if (score <= 89) return "text-lime-300";
-  return "text-emerald-400";
+  task_id: string;
+  user_id: string;
+  file_path: string | null;
+  file_url?: string | null;
+  created_at: string;
 };
 
 export default function TeacherTasksClient() {
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [submissionsByAssignment, setSubmissionsByAssignment] = useState<
-    Record<string, Submission[]>
-  >({});
-  const [gradesByAssignment, setGradesByAssignment] = useState<
-    Record<string, Grade[]>
-  >({});
-  const [gradeDrafts, setGradeDrafts] = useState<Record<string, GradeDraft>>({});
-  const [expandedStudents, setExpandedStudents] = useState<Record<string, boolean>>({});
+  const supabase = useMemo(() => createClient(), []);
+
+  const [tasks, setTasks] = useState<Task[]>([]);
+  const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
+  const [loading, setLoading] = useState(true);
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     description: "",
-    assignedDate: "",
     deadline: "",
-    link: "",
-    attachments: [] as Attachment[],
+    file: null as File | null,
   });
-  const [loading, setLoading] = useState(true);
 
-  const supabase = useMemo(() => createClient(), []);
+  const load = async () => {
+    setError(null);
+    const { data: taskRows, error: taskErr } = await supabase
+      .from("tasks")
+      .select("id,title,description,deadline,file_path,created_at")
+      .order("created_at", { ascending: false });
 
-  const loadAssignments = async () => {
-    const res = await fetch("/api/tasks");
-    const data = await res.json();
-    const items: Assignment[] = Array.isArray(data) ? data : [];
-    setAssignments(items);
+    if (taskErr) {
+      setError(taskErr.message);
+      setLoading(false);
+      return;
+    }
 
-    const submissionsEntries: Record<string, Submission[]> = {};
-    const gradesEntries: Record<string, Grade[]> = {};
+    const tasksWithUrls =
+      taskRows?.map((t) => ({
+        ...t,
+        file_url: t.file_path
+          ? supabase.storage.from("tasks").getPublicUrl(t.file_path).data.publicUrl
+          : null,
+      })) ?? [];
+    setTasks(tasksWithUrls);
 
-    await Promise.all(
-      items.map(async (assignment) => {
-        const [subsRes, gradesRes] = await Promise.all([
-          fetch(`/api/submissions?assignmentId=${encodeURIComponent(assignment.id)}`),
-          fetch(`/api/grades?assignmentId=${encodeURIComponent(assignment.id)}`),
-        ]);
-        const subsData = await subsRes.json();
-        const gradesData = await gradesRes.json();
-        submissionsEntries[assignment.id] = Array.isArray(subsData) ? subsData : [];
-        gradesEntries[assignment.id] = Array.isArray(gradesData) ? gradesData : [];
-      })
-    );
+    const { data: subsRows } = await supabase
+      .from("task_submissions")
+      .select("id,task_id,user_id,file_path,created_at");
 
-    setSubmissionsByAssignment(submissionsEntries);
-    setGradesByAssignment(gradesEntries);
+    const subs = (subsRows ?? []).map((s) => ({
+      ...s,
+      file_url: s.file_path
+        ? supabase.storage.from("tasks").getPublicUrl(s.file_path).data.publicUrl
+        : null,
+    }));
+
+    const byTask: Record<string, Submission[]> = {};
+    subs.forEach((s) => {
+      byTask[s.task_id] = [...(byTask[s.task_id] ?? []), s];
+    });
+    setSubmissions(byTask);
+    setLoading(false);
   };
 
   useEffect(() => {
-    (async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) {
-        setLoading(false);
-        return;
-      }
-
-      await loadAssignments();
-      setLoading(false);
-    })();
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const updateGradeDraft = (key: string, patch: Partial<GradeDraft>) => {
-    setGradeDrafts((prev) => {
-      const current = prev[key] ?? { score: "", comment: "", isSaving: false };
-      return { ...prev, [key]: { ...current, ...patch } };
-    });
-  };
-
-  const toggleStudent = (key: string) => {
-    setExpandedStudents((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const createAssignment = async () => {
+  const createTask = async () => {
     if (!form.title.trim() || !form.description.trim()) {
-      alert("Заполните название и описание.");
+      setError("Заполните название и описание");
       return;
     }
-
-    const attachments = [...form.attachments];
-    if (form.link.trim()) {
-      attachments.push({ name: form.link.trim(), url: form.link.trim() });
-    }
-
-    const res = await fetch("/api/tasks", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: form.title.trim(),
-        description: form.description.trim(),
-        assignedDate: form.assignedDate || undefined,
-        deadline: form.deadline || undefined,
-        attachments,
-      }),
-    });
-
-    if (!res.ok) {
-      const text = await res.text();
-      alert(`Ошибка создания задания: ${text}`);
-      return;
-    }
-
-    const created = await res.json();
-    setAssignments((prev) => [created, ...prev]);
-    setSubmissionsByAssignment((prev) => ({ ...prev, [created.id]: [] }));
-    setGradesByAssignment((prev) => ({ ...prev, [created.id]: [] }));
-    setForm({
-      title: "",
-      description: "",
-      assignedDate: "",
-      deadline: "",
-      link: "",
-      attachments: [],
-    });
-  };
-
-  const saveGrade = async (assignmentId: string, studentId: string) => {
-    const key = `${assignmentId}:${studentId}`;
-    const draft = gradeDrafts[key];
-    const score = Number(draft?.score);
-    if (!Number.isFinite(score)) {
-      alert("Введите числовую оценку.");
-      return;
-    }
-
-    updateGradeDraft(key, { isSaving: true });
-    const res = await fetch("/api/grades", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        assignmentId,
-        studentId,
-        score,
-        comment: draft?.comment ?? "",
-      }),
-    });
-    updateGradeDraft(key, { isSaving: false });
-
-    if (!res.ok) {
-      alert("Ошибка выставления оценки");
-      return;
-    }
-    const grade = await res.json();
-    setGradesByAssignment((prev) => {
-      const list = prev[assignmentId] ?? [];
-      const existingIndex = list.findIndex((g) => g.studentId === studentId);
-      if (existingIndex >= 0) {
-        const next = [...list];
-        next[existingIndex] = grade;
-        return { ...prev, [assignmentId]: next };
+    setCreating(true);
+    setError(null);
+    try {
+      let filePath: string | null = null;
+      if (form.file) {
+        const ext = form.file.name.split(".").pop();
+        filePath = `tasks/${crypto.randomUUID()}.${ext ?? "dat"}`;
+        const { error: uploadError } = await supabase.storage
+          .from("tasks")
+          .upload(filePath, form.file, { cacheControl: "3600", upsert: false });
+        if (uploadError) throw uploadError;
       }
-      return { ...prev, [assignmentId]: [...list, grade] };
-    });
+
+      const { data, error: insertError } = await supabase
+        .from("tasks")
+        .insert({
+          title: form.title.trim(),
+          description: form.description.trim(),
+          deadline: form.deadline || null,
+          file_path: filePath,
+        })
+        .select("id,title,description,deadline,file_path,created_at")
+        .single();
+
+      if (insertError) throw insertError;
+
+      const newTask: Task = {
+        ...data!,
+        file_url: filePath
+          ? supabase.storage.from("tasks").getPublicUrl(filePath).data.publicUrl
+          : null,
+      };
+
+      setTasks((prev) => [newTask, ...prev]);
+      setForm({ title: "", description: "", deadline: "", file: null });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Не удалось создать задание");
+    } finally {
+      setCreating(false);
+    }
   };
 
-  if (loading) {
-    return <div className="text-white">Загрузка...</div>;
-  }
+  if (loading) return <div className="text-white">Загрузка…</div>;
 
   return (
-    <div className="space-y-8 text-white">
+    <div className="space-y-6 text-white">
       <header className="rounded-3xl border border-white/10 bg-white/5 p-6">
-        <h1 className="text-3xl font-semibold">Задания преподавателя</h1>
+        <h1 className="text-3xl font-semibold">Задания (преподаватель)</h1>
         <p className="text-sm text-slate-300">
-          Создавайте задания, принимайте отправки и выставляйте оценки.
+          Создавайте задания, прикрепляйте файлы (хранятся в бакете storage.tasks). Студенты увидят их на своей странице задач и смогут отправлять решения, которые сохраняются как записи в task_submissions + файлы в том же бакете.
         </p>
       </header>
 
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+      {error && (
+        <div className="rounded-2xl border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-100">
+          {error}
+        </div>
+      )}
+
+      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-4">
         <h2 className="text-xl font-semibold">Новое задание</h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-2">
           <input
             value={form.title}
-            onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+            onChange={(e) => setForm((p) => ({ ...p, title: e.target.value }))}
             placeholder="Название"
             className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder:text-slate-500"
           />
           <input
             type="date"
-            value={form.assignedDate}
-            onChange={(event) => setForm((prev) => ({ ...prev, assignedDate: event.target.value }))}
-            className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white"
-          />
-          <input
-            value={form.description}
-            onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
-            placeholder="Описание"
-            className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder:text-slate-500 md:col-span-2"
-          />
-          <input
-            type="date"
             value={form.deadline}
-            onChange={(event) => setForm((prev) => ({ ...prev, deadline: event.target.value }))}
+            onChange={(e) => setForm((p) => ({ ...p, deadline: e.target.value }))}
             className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white"
           />
-          <input
-            type="url"
-            value={form.link}
-            onChange={(event) => setForm((prev) => ({ ...prev, link: event.target.value }))}
-            placeholder="Ссылка на материалы"
-            className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder:text-slate-500"
+          <textarea
+            value={form.description}
+            onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+            placeholder="Описание"
+            className="md:col-span-2 min-h-[100px] rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder:text-slate-500"
           />
-        </div>
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <label className="cursor-pointer rounded-xl border border-white/10 bg-white/10 px-4 py-2 text-xs font-semibold text-white">
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/10 px-3 py-2 text-sm font-semibold">
             <input
               type="file"
-              multiple
               className="hidden"
-              onChange={async (event) => {
-                const files = await readFiles(event.target.files);
-                setForm((prev) => ({ ...prev, attachments: files }));
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                setForm((p) => ({ ...p, file }));
               }}
             />
-            Прикрепить файлы
+            <UploadCloud size={16} />
+            {form.file ? form.file.name : "Прикрепить файл"}
           </label>
-          <span className="text-xs text-slate-400">
-            {form.attachments.length ? `Файлов: ${form.attachments.length}` : "Файлы не выбраны"}
-          </span>
-          <button
-            onClick={createAssignment}
-            className="ml-auto rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white"
-          >
-            Создать задание
-          </button>
         </div>
+        <button
+          onClick={createTask}
+          disabled={creating}
+          className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white"
+        >
+          {creating ? "Сохраняем…" : "Создать задание"}
+        </button>
       </section>
 
-      <section className="space-y-6">
-        {assignments.length === 0 ? (
-          <div className="rounded-3xl border border-white/10 bg-white/5 p-6 text-slate-200">
-            Задания еще не созданы.
+      <section className="space-y-4">
+        {tasks.length === 0 ? (
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 text-slate-200">
+            Заданий пока нет.
           </div>
         ) : (
-          assignments.map((assignment) => {
-            const submissions = submissionsByAssignment[assignment.id] ?? [];
-            const grades = gradesByAssignment[assignment.id] ?? [];
+          tasks.map((task) => {
+            const subs = submissions[task.id] ?? [];
             return (
-              <div
-                key={assignment.id}
-                className="rounded-3xl border border-white/10 bg-white/5 p-6"
+              <article
+                key={task.id}
+                className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4"
               >
-                <div className="flex flex-wrap items-start justify-between gap-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
-                    <h3 className="text-2xl font-semibold">{assignment.title}</h3>
-                    <p className="mt-2 text-slate-200">{assignment.description}</p>
+                    <p className="text-xs uppercase tracking-[0.25em] text-slate-400">
+                      Дедлайн:{" "}
+                      {task.deadline
+                        ? new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium" }).format(
+                            new Date(task.deadline)
+                          )
+                        : "—"}
+                    </p>
+                    <h3 className="text-xl font-semibold">{task.title}</h3>
+                    <p className="text-sm text-slate-200">{task.description}</p>
                   </div>
-                  <div className="text-sm text-slate-300">
-                    <p>Назначено: {toLocaleDate(assignment.assignedDate)}</p>
-                    <p>Дедлайн: {toLocaleDate(assignment.deadline)}</p>
-                  </div>
-                </div>
-
-                {assignment.attachments && assignment.attachments.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {assignment.attachments.map((attachment) => (
-                      <a
-                        key={attachment.url}
-                        href={attachment.url}
-                        download={attachment.name}
-                        className="rounded-full border border-white/20 px-3 py-1 text-xs text-white"
-                      >
-                        {attachment.name}
-                      </a>
-                    ))}
-                  </div>
-                )}
-
-                <div className="mt-6 space-y-4">
-                  <h4 className="text-sm uppercase tracking-[0.35em] text-slate-300">
-                    Отправки студентов
-                  </h4>
-                  {submissions.length === 0 ? (
-                    <p className="text-sm text-slate-400">Отправок пока нет.</p>
-                  ) : (
-                    (() => {
-                      const sorted = submissions
-                        .slice()
-                        .sort(
-                          (a, b) =>
-                            new Date(b.submittedAt).getTime() -
-                            new Date(a.submittedAt).getTime()
-                        );
-
-                      const byStudent = new Map<string, Submission[]>();
-                      sorted.forEach((submission) => {
-                        const list = byStudent.get(submission.studentId) ?? [];
-                        list.push(submission);
-                        byStudent.set(submission.studentId, list);
-                      });
-
-                      return Array.from(byStudent.entries()).map(([studentId, studentSubs]) => {
-                        const studentName = studentSubs[0]?.studentName || studentId;
-                        const latest = studentSubs[0];
-                        const grade = grades.find((g) => g.studentId === studentId);
-                        const key = `${assignment.id}:${studentId}`;
-                        const draft = gradeDrafts[key] ?? {
-                          score: grade?.score?.toString() ?? "",
-                          comment: grade?.comment ?? "",
-                          isSaving: false,
-                        };
-                        const isExpanded = expandedStudents[key] ?? false;
-
-                        return (
-                          <div
-                            key={studentId}
-                            className="rounded-2xl border border-white/10 bg-black/30 p-4"
-                          >
-                            <div className="flex flex-wrap items-start justify-between gap-3">
-                              <div>
-                                <p className="text-sm font-semibold text-white">
-                                  {studentName}
-                                </p>
-                                <p className="text-xs text-slate-400">
-                                  Последняя отправка:{" "}
-                                  {new Intl.DateTimeFormat("ru-RU", {
-                                    dateStyle: "medium",
-                                    timeStyle: "short",
-                                  }).format(new Date(latest.submittedAt))}
-                                </p>
-                              </div>
-                              <div className="flex items-center gap-2 text-xs text-slate-400">
-                                <span>Отправок: {studentSubs.length}</span>
-                                {grade && (
-                                  <span className="rounded-full border border-white/10 bg-black/40 px-3 py-1">
-                                    Оценка:{" "}
-                                    <span className={gradeColorClass(grade.score)}>
-                                      {grade.score}
-                                    </span>
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-
-                            <p className="mt-2 text-sm text-slate-200">
-                              {latest.description || "Без описания."}
-                            </p>
-
-                            {latest.attachments && latest.attachments.length > 0 && (
-                              <div className="mt-3 flex flex-wrap gap-2">
-                                {latest.attachments.map((attachment) => (
-                                  <a
-                                    key={attachment.url}
-                                    href={attachment.url}
-                                    download={attachment.name}
-                                    className="rounded-full border border-cyan-300/40 px-3 py-1 text-xs text-cyan-100"
-                                  >
-                                    {attachment.name}
-                                  </a>
-                                ))}
-                              </div>
-                            )}
-
-                            <div className="mt-4 grid gap-3 md:grid-cols-[140px_1fr_180px]">
-                              <input
-                                value={draft.score}
-                                onChange={(event) =>
-                                  updateGradeDraft(key, { score: event.target.value })
-                                }
-                                placeholder="Оценка"
-                                className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder:text-slate-500"
-                              />
-                              <input
-                                value={draft.comment}
-                                onChange={(event) =>
-                                  updateGradeDraft(key, { comment: event.target.value })
-                                }
-                                placeholder="Комментарий преподавателя"
-                                className="rounded-xl border border-white/10 bg-black/40 p-3 text-sm text-white placeholder:text-slate-500"
-                              />
-                              <button
-                                onClick={() => saveGrade(assignment.id, studentId)}
-                                disabled={draft.isSaving}
-                                className="rounded-xl bg-emerald-500 px-4 py-2 text-sm font-semibold text-white"
-                              >
-                                {draft.isSaving ? "Сохранение..." : "Сохранить оценку"}
-                              </button>
-                            </div>
-
-                            <button
-                              type="button"
-                              onClick={() => toggleStudent(key)}
-                              className="mt-4 text-xs font-semibold text-cyan-200"
-                            >
-                              {isExpanded
-                                ? "Скрыть все отправки"
-                                : "Показать все отправки"}
-                            </button>
-
-                            {isExpanded && (
-                              <div className="mt-3 space-y-3">
-                                {studentSubs.map((submission, index) => (
-                                  <div
-                                    key={submission.id}
-                                    className="rounded-xl border border-white/10 bg-black/40 p-3 text-xs text-slate-200"
-                                  >
-                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                      <span>Отправка #{studentSubs.length - index}</span>
-                                      <span className="text-slate-400">
-                                        {new Intl.DateTimeFormat("ru-RU", {
-                                          dateStyle: "medium",
-                                          timeStyle: "short",
-                                        }).format(new Date(submission.submittedAt))}
-                                      </span>
-                                    </div>
-                                    <p className="mt-2">
-                                      {submission.description || "Без описания."}
-                                    </p>
-                                    {submission.attachments &&
-                                      submission.attachments.length > 0 && (
-                                        <div className="mt-2 flex flex-wrap gap-2">
-                                          {submission.attachments.map((attachment) => (
-                                            <a
-                                              key={attachment.url}
-                                              href={attachment.url}
-                                              download={attachment.name}
-                                              className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-slate-200"
-                                            >
-                                              {attachment.name}
-                                            </a>
-                                          ))}
-                                        </div>
-                                      )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        );
-                      });
-                    })()
+                  {task.file_url && (
+                    <a
+                      href={task.file_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border border-white/20 px-3 py-1 text-xs text-white"
+                    >
+                      <UploadCloud size={14} />
+                      Материал
+                    </a>
                   )}
                 </div>
-              </div>
+
+                <div className="rounded-xl border border-white/10 bg-black/30 p-3 text-sm text-slate-200">
+                  <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+                    Отправки студентов
+                  </p>
+                  {subs.length === 0 ? (
+                    <p className="text-slate-400">Пока нет отправок.</p>
+                  ) : (
+                    subs
+                      .slice()
+                      .sort(
+                        (a, b) =>
+                          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+                      )
+                      .map((sub) => (
+                        <div
+                          key={sub.id}
+                          className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/5 px-3 py-2"
+                        >
+                          <div>
+                            <p className="text-sm font-semibold">{sub.user_id}</p>
+                            <p className="text-xs text-slate-400">
+                              {new Intl.DateTimeFormat("ru-RU", {
+                                dateStyle: "medium",
+                                timeStyle: "short",
+                              }).format(new Date(sub.created_at))}
+                            </p>
+                          </div>
+                          {sub.file_url ? (
+                            <a
+                              href={sub.file_url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-cyan-300 underline underline-offset-4"
+                            >
+                              Открыть файл
+                            </a>
+                          ) : (
+                            <span className="text-slate-500">Файл недоступен</span>
+                          )}
+                        </div>
+                      ))
+                  )}
+                </div>
+              </article>
             );
           })
         )}

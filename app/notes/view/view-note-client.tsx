@@ -1,10 +1,11 @@
 'use client';
 
-import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { createClient } from '@/lib/supabase/client';
-import { ArrowLeft, Trash2, FileDown, X } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import ReactMarkdown from 'react-markdown';
+import { ArrowLeft, FileDown, Trash2, X } from 'lucide-react';
+
+import { createClient } from '@/lib/supabase/client';
 
 type Note = {
   id: string;
@@ -16,8 +17,8 @@ type Note = {
 };
 
 export default function ViewNoteClient() {
-  const params = useSearchParams();
   const router = useRouter();
+  const params = useSearchParams();
   const id = params.get('id');
   const supabase = createClient();
 
@@ -37,7 +38,9 @@ export default function ViewNoteClient() {
         .select('id,title,content,tags,created_at,updated_at')
         .eq('id', id)
         .single();
-      if (error) console.error('Ошибка загрузки заметки:', error);
+      if (error) {
+        console.error('Ошибка загрузки заметки:', error);
+      }
       if (data) {
         setNote(data);
         setTitle(data.title);
@@ -54,17 +57,20 @@ export default function ViewNoteClient() {
     const updatedTags = tags
       .split(',')
       .map(t => t.trim())
-      .filter(t => t.length > 0);
+      .filter(Boolean);
+
     const { error, data } = await supabase
       .from('notes')
       .update({ title, content, tags: updatedTags })
       .eq('id', note.id)
       .select()
       .single();
+
     if (error) {
-      console.error('Ошибка сохранения:', error);
+      console.error('Ошибка сохранения заметки:', error);
       return;
     }
+
     setNote(data);
   };
 
@@ -86,7 +92,7 @@ export default function ViewNoteClient() {
     if (!note) return;
     const { error } = await supabase.from('notes').delete().eq('id', note.id);
     if (error) {
-      console.error('Ошибка удаления:', error);
+      console.error('Ошибка удаления заметки:', error);
       return;
     }
     setConfirmDeleteOpen(false);
@@ -121,6 +127,7 @@ export default function ViewNoteClient() {
             onChange={e => setTitle(e.target.value)}
             onBlur={saveEdit}
             className="w-full bg-transparent text-2xl font-bold focus:outline-none"
+            placeholder="Название"
           />
           <input
             value={tags}
@@ -139,14 +146,22 @@ export default function ViewNoteClient() {
           </p>
         </header>
 
-        <div
-          contentEditable
-          suppressContentEditableWarning
-          onInput={e => setContent((e.target as HTMLElement).innerText)}
-          onBlur={saveEdit}
-          className="prose prose-invert max-w-none rounded-xl bg-slate-800 p-3 text-white focus:outline-none"
-        >
-          <ReactMarkdown>{content}</ReactMarkdown>
+        <div className="grid gap-3 md:grid-cols-2">
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-slate-300">Текст заметки</label>
+            <textarea
+              value={content}
+              onChange={e => setContent(e.target.value)}
+              onBlur={saveEdit}
+              className="min-h-[240px] rounded-xl border border-white/10 bg-slate-800 p-3 text-white focus:outline-none focus:border-violet-400"
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            <label className="text-sm text-slate-300">Предпросмотр</label>
+            <div className="prose prose-invert max-w-none rounded-xl border border-white/10 bg-slate-900/60 p-3 text-white">
+              <ReactMarkdown>{content || '_Нет текста_'}</ReactMarkdown>
+            </div>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-4 pt-4">
@@ -201,4 +216,3 @@ export default function ViewNoteClient() {
     </div>
   );
 }
-

@@ -1,7 +1,5 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-
-import { createClient } from '@/lib/supabase/server';
 import {
   ArrowRight,
   GraduationCap,
@@ -11,6 +9,8 @@ import {
   Phone,
   Shield,
 } from 'lucide-react';
+
+import { createClient } from '@/lib/supabase/server';
 
 type StudentRow = {
   inn: number;
@@ -38,9 +38,7 @@ export default async function ProfilePage() {
       <section className="mx-auto mt-16 flex max-w-xl flex-col items-center gap-4 rounded-3xl border border-white/15 bg-white/5 p-8 text-center text-slate-100">
         <GraduationCap size={28} className="text-indigo-300" />
         <h2 className="text-2xl font-semibold text-white">Вы не вошли в аккаунт</h2>
-        <p className="text-sm text-slate-400">
-          Войдите, чтобы увидеть профиль и учебные данные.
-        </p>
+        <p className="text-sm text-slate-400">Войдите, чтобы увидеть профиль и учебные данные.</p>
         <Link
           href="/auth/login"
           className="mt-2 inline-flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-500 to-cyan-400 px-5 py-2 text-sm font-semibold text-white"
@@ -52,26 +50,19 @@ export default async function ProfilePage() {
     );
   }
 
-  const [
-    { data: studentRowRaw },
-    { data: teacherRowRaw },
-    { data: superadminRow },
-  ] = await Promise.all([
+  const [{ data: studentRow }, { data: teacherRow }, { data: superadminRow }] = await Promise.all([
     supabase
       .from('students')
       .select('inn, Name, Last_Name, Middle_Name, user_id')
       .eq('user_id', user.id)
-      .maybeSingle(),
+      .maybeSingle<StudentRow>(),
     supabase
       .from('teachers')
       .select('first_name,last_name,middle_name,user_id')
       .eq('user_id', user.id)
-      .maybeSingle(),
+      .maybeSingle<TeacherRow>(),
     supabase.from('superadmins').select('user_id').eq('user_id', user.id).maybeSingle(),
   ]);
-
-  const studentRow = studentRowRaw as StudentRow | null;
-  const teacherRow = teacherRowRaw as TeacherRow | null;
 
   const isSuperadmin = Boolean(superadminRow);
   const isTeacher = Boolean(teacherRow);
@@ -82,14 +73,8 @@ export default async function ProfilePage() {
   }
 
   const displayName =
-    (teacherRow &&
-      [teacherRow.last_name, teacherRow.first_name, teacherRow.middle_name]
-        .filter(Boolean)
-        .join(' ')) ||
     (studentRow &&
-      [studentRow.Last_Name, studentRow.Name, studentRow.Middle_Name]
-        .filter(Boolean)
-        .join(' ')) ||
+      [studentRow.Last_Name, studentRow.Name, studentRow.Middle_Name].filter(Boolean).join(' ')) ||
     user.user_metadata?.full_name ||
     'Пользователь';
 
@@ -155,21 +140,42 @@ export default async function ProfilePage() {
           </div>
         </div>
 
-        <div className="grid min-w-fit max-w-80 flex-1 grid-rows-1 gap-3 text-sm text-slate-100 sm:grid-rows-3">
+        <div className="grid min-w-fit max-w-96 flex-1 grid-rows-1 gap-3 text-sm text-slate-100 sm:grid-rows-4">
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <Mail size={16} />
             {email}
           </div>
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <Phone size={16} />
-            {phone}
+            <IdCard size={16} />
+            ИИН: {inn}
           </div>
           <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <MapPin size={16} />
             {city}
           </div>
+          <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+            <Phone size={16} />
+            {phone}
+          </div>
         </div>
       </section>
+
+      {isStudent && (
+        <section className="grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-6 text-white md:grid-cols-3">
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Группа</p>
+            <p className="text-lg font-semibold">{groupName}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Курс</p>
+            <p className="text-lg font-semibold">{courseName}</p>
+          </div>
+          <div className="space-y-1">
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Город</p>
+            <p className="text-lg font-semibold">{city}</p>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
