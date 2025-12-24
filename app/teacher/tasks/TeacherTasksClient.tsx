@@ -28,6 +28,7 @@ type Submission = {
 };
 
 type GradeDraft = { score: string; comment: string; saving: boolean };
+type StudentName = { userId: string; name: string };
 
 export default function TeacherTasksClient() {
   const supabase = useMemo(() => createClient(), []);
@@ -47,6 +48,7 @@ export default function TeacherTasksClient() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [studentNames, setStudentNames] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -98,6 +100,18 @@ export default function TeacherTasksClient() {
       byTask[s.task_id] = [...(byTask[s.task_id] ?? []), s];
     });
     setSubmissions(byTask);
+    const studentIds = Array.from(new Set(subs.map((s) => s.user_id)));
+    if (studentIds.length > 0) {
+      const res = await fetch(`/api/students?ids=${encodeURIComponent(studentIds.join(","))}`);
+      const data = (await res.json()) as StudentName[];
+      if (res.ok && Array.isArray(data)) {
+        const next: Record<string, string> = {};
+        data.forEach((row) => {
+          if (row?.userId && row?.name) next[row.userId] = row.name;
+        });
+        setStudentNames(next);
+      }
+    }
     setLoading(false);
   };
 
@@ -305,11 +319,13 @@ export default function TeacherTasksClient() {
                           className="mt-2 space-y-2 rounded-lg border border-white/5 bg-white/5 px-3 py-2"
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2">
-                            <div>
-                              <p className="text-sm font-semibold">{sub.user_id}</p>
-                              <p className="text-xs text-slate-400">
-                                {new Intl.DateTimeFormat("ru-RU", {
-                                  dateStyle: "medium",
+                          <div>
+                            <p className="text-sm font-semibold">
+                              {studentNames[sub.user_id] ?? "Студент"}
+                            </p>
+                            <p className="text-xs text-slate-400">
+                              {new Intl.DateTimeFormat("ru-RU", {
+                                dateStyle: "medium",
                                   timeStyle: "short",
                                 }).format(new Date(sub.created_at))}
                               </p>

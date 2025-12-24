@@ -76,8 +76,23 @@ export default function GradesChart() {
         return;
       }
 
-      const nextPoints = grades
+      const ordered = grades
         .slice()
+        .sort(
+          (a, b) =>
+            new Date(a.gradedAt).getTime() - new Date(b.gradedAt).getTime()
+        );
+
+      const latestByDay = new Map<string, Grade>();
+      ordered.forEach((grade) => {
+        const dt = new Date(grade.gradedAt);
+        const dateKey = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(
+          dt.getDate(),
+        ).padStart(2, "0")}`;
+        latestByDay.set(dateKey, grade);
+      });
+
+      const nextPoints = Array.from(latestByDay.values())
         .sort(
           (a, b) =>
             new Date(a.gradedAt).getTime() - new Date(b.gradedAt).getTime()
