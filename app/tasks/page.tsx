@@ -48,6 +48,13 @@ export default function TasksPage() {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const [files, setFiles] = useState<Record<string, File | null>>({});
 
+  const isExpired = (deadline: string | null) => {
+    if (!deadline) return false;
+    const deadlineDate = new Date(deadline);
+    const graceUntil = deadlineDate.getTime() + 24 * 60 * 60 * 1000;
+    return Date.now() > graceUntil;
+  };
+
   const signUrl = async (path: string | null): Promise<string | null> => {
     if (!path) return null;
     const { data, error } = await supabase.storage.from("tasks").createSignedUrl(path, 60 * 60);
@@ -236,7 +243,7 @@ export default function TasksPage() {
             Заданий пока нет.
           </div>
         ) : (
-          tasks.map((task) => {
+          tasks.filter((task) => !isExpired(task.deadline)).map((task) => {
             const mySubs = submissions[task.id] ?? [];
             return (
               <article

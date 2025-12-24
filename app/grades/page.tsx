@@ -37,6 +37,28 @@ type GradeRow = {
   } | null;
 };
 
+type ActivityRow = {
+  title: string;
+  weight: string;
+  status: "Сдано" | "На проверке" | "Не сдано" | "Дедлайн прошел";
+  score: string;
+  due: string;
+};
+
+type TaskRow = {
+  id: string;
+  title: string;
+  deadline: string | null;
+  created_at: string;
+};
+
+type SubmissionRow = {
+  id: string;
+  task_id: string;
+  created_at: string;
+  score: number | null;
+};
+
 const gradeToLetter = (score: number) => {
   if (score >= 90) return "A";
   if (score >= 80) return "B";
@@ -72,19 +94,13 @@ const fallbackGradeGroups: GradeGroup[] = [
   },
 ];
 
-const breakdownRows = [
-  { title: "Практика: базы данных и SQL", weight: "30%", status: "Сдано", score: "94/100", due: "02 мар" },
-  { title: "Лабораторная: Supabase Edge Functions", weight: "20%", status: "В работе", score: "—", due: "05 мар" },
-  { title: "Design critique: UI макет", weight: "15%", status: "На проверке", score: "—", due: "07 мар" },
-  { title: "Экзамен по дисциплине", weight: "35%", status: "Готовится", score: "—", due: "15 мар" },
-];
-
 export default function GradesPage() {
   const router = useRouter();
   const scrollRef = useRef<HTMLDivElement>(null);
   const CARD_WIDTH = 320;
   const GAP = 16;
   const [gradeGroups, setGradeGroups] = useState<GradeGroup[]>(fallbackGradeGroups);
+  const [activityRows, setActivityRows] = useState<ActivityRow[]>([]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -103,6 +119,60 @@ export default function GradesPage() {
           router.replace("/teacher/grades");
           return;
         }
+
+        const [{ data: taskRows }, { data: submissionRows }] = await Promise.all([
+          supabase
+            .from("tasks")
+            .select("id,title,deadline,created_at")
+            .order("created_at", { ascending: false }),
+          supabase
+            .from("task_submissions")
+            .select("id,task_id,created_at,score")
+            .eq("user_id", user.id),
+        ]);
+
+        const tasks = (taskRows ?? []) as TaskRow[];
+        const submissions = (submissionRows ?? []) as SubmissionRow[];
+        const byTask = new Map<string, SubmissionRow[]>();
+        submissions.forEach((sub) => {
+          byTask.set(sub.task_id, [...(byTask.get(sub.task_id) ?? []), sub]);
+        });
+
+        const nextActivityRows: ActivityRow[] = tasks.map((task) => {
+          const list = byTask.get(task.id) ?? [];
+          const latest = list
+            .slice()
+            .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())[0];
+          const deadlinePassed =
+            task.deadline &&
+            Date.now() > new Date(task.deadline).getTime() + 24 * 60 * 60 * 1000;
+          const status = latest
+            ? latest.score == null
+              ? "На проверке"
+              : "Сдано"
+            : deadlinePassed
+              ? "Дедлайн прошел"
+              : "Не сдано";
+          const score =
+            latest?.score != null
+              ? `${latest.score}/100`
+              : latest
+                ? "—/100"
+                : "0/100";
+          const due = task.deadline
+            ? new Intl.DateTimeFormat("ru-RU", { day: "2-digit", month: "short" }).format(
+                new Date(task.deadline)
+              )
+            : "—";
+          return {
+            title: task.title,
+            weight: "—",
+            status,
+            score,
+            due,
+          };
+        });
+        setActivityRows(nextActivityRows);
       }
 
       const { data, error } = await supabase
@@ -328,7 +398,14 @@ export default function GradesPage() {
             </thead>
 
             <tbody>
-              {breakdownRows.map((row) => (
+              {activityRows.length === 0 ? (
+                <tr className="odd:bg-white/5">
+                  <td className="px-4 py-3 text-slate-300" colSpan={5}>
+                    Активности пока не найдены.
+                  </td>
+                </tr>
+              ) : (
+                activityRows.map((row) => (
                 <tr key={row.title} className="odd:bg-white/5">
                   <td className="px-4 py-3 font-medium text-white">
                     {row.title}
@@ -336,7 +413,17 @@ export default function GradesPage() {
                   <td className="px-4 py-3 text-slate-300">{row.weight}</td>
 
                   <td className="px-4 py-3">
-                    <span className="rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100">
+                    <span
+                      className={
+                        row.status === "Сдано"
+                          ? "rounded-full border border-emerald-300/40 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-100"
+                          : row.status === "На проверке"
+                            ? "rounded-full border border-yellow-300/40 bg-yellow-400/10 px-3 py-1 text-xs font-semibold text-yellow-100"
+                            : row.status === "Дедлайн прошел"
+                              ? "rounded-full border border-red-300/40 bg-red-400/10 px-3 py-1 text-xs font-semibold text-red-100"
+                              : "rounded-full border border-slate-400/40 bg-slate-500/10 px-3 py-1 text-xs font-semibold text-slate-200"
+                      }
+                    >
                       {row.status}
                     </span>
                   </td>
@@ -344,7 +431,8 @@ export default function GradesPage() {
                   <td className="px-4 py-3 text-slate-300">{row.score}</td>
                   <td className="px-4 py-3 text-slate-300">{row.due}</td>
                 </tr>
-              ))}
+              )))
+              }
             </tbody>
           </table>
         </div>
