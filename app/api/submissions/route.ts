@@ -9,7 +9,7 @@ export async function GET(req: Request) {
   const supabase = await createClient();
   const query = supabase
     .from('task_submissions')
-    .select('id,task_id,user_id,file_path,created_at,score,comment');
+    .select('id,task_id,user_id,file_path,created_at,score,comment,description');
   if (taskId) query.eq('task_id', taskId);
   if (studentId) query.eq('user_id', studentId);
 
@@ -46,9 +46,9 @@ export async function POST(req: Request) {
       task_id,
       user_id: user.id,
       file_path,
-      comment: description ?? null,
+      description: description ?? null,
     })
-    .select('id,task_id,user_id,file_path,created_at,score,comment')
+    .select('id,task_id,user_id,file_path,created_at,score,comment,description')
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });

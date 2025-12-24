@@ -23,7 +23,8 @@ type Submission = {
   file_url?: string | null;
   created_at: string;
   score?: number | null;
-  comment?: string | null;
+  comment?: string | null; // комментарий преподавателя
+  description?: string | null; // комментарий студента
 };
 
 type GradeDraft = { score: string; comment: string; saving: boolean };
@@ -81,7 +82,7 @@ export default function TeacherTasksClient() {
 
     const { data: subsRows } = await supabase
       .from("task_submissions")
-      .select("id,task_id,user_id,file_path,created_at,score,comment");
+      .select("id,task_id,user_id,file_path,created_at,score,comment,description");
 
     const subs = subsRows
       ? await Promise.all(
@@ -185,14 +186,15 @@ export default function TeacherTasksClient() {
     });
   };
 
-  if (loading) return <div className="text-white">Загрузка…</div>;
+  if (loading) return <div className="text-white">Загрузка:</div>;
 
   return (
     <div className="space-y-6 text-white">
       <header className="rounded-3xl border border-white/10 bg-white/5 p-6">
         <h1 className="text-3xl font-semibold">Задания (преподаватель)</h1>
         <p className="text-sm text-slate-300">
-          Создавайте задания, прикрепляйте материалы (бакет storage.tasks). Студенты отправляют решения в task_submissions, здесь можно проверить и выставить оценку.
+          Создавайте задания, прикрепляйте материалы (бакет storage.tasks). Студенты отправляют решения в
+          task_submissions, здесь можно проверить и выставить оценку.
         </p>
       </header>
 
@@ -241,7 +243,7 @@ export default function TeacherTasksClient() {
           disabled={creating}
           className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white"
         >
-          {creating ? "Сохраняем…" : "Создать задание"}
+          {creating ? "Сохраняем:" : "Создать задание"}
         </button>
       </section>
 
@@ -266,7 +268,7 @@ export default function TeacherTasksClient() {
                         ? new Intl.DateTimeFormat("ru-RU", { dateStyle: "medium" }).format(
                             new Date(task.deadline)
                           )
-                        : "—"}
+                        : "-"}
                     </p>
                     <h3 className="text-xl font-semibold">{task.title}</h3>
                     <p className="text-sm text-slate-200">{task.description}</p>
@@ -311,6 +313,11 @@ export default function TeacherTasksClient() {
                                   timeStyle: "short",
                                 }).format(new Date(sub.created_at))}
                               </p>
+                              {sub.description && (
+                                <p className="text-xs text-slate-300">
+                                  Комментарий студента: {sub.description}
+                                </p>
+                              )}
                             </div>
                             {sub.file_url ? (
                               <a
@@ -335,7 +342,7 @@ export default function TeacherTasksClient() {
                               className="rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-sm"
                             />
                             <input
-                              placeholder="Комментарий"
+                              placeholder="Комментарий преподавателя"
                               value={grades[sub.id]?.comment ?? (sub.comment ?? "")}
                               onChange={(e) =>
                                 updateGradeDraft(sub.id, { comment: e.target.value })
@@ -347,7 +354,7 @@ export default function TeacherTasksClient() {
                               disabled={grades[sub.id]?.saving}
                               className="rounded-lg bg-emerald-500 px-3 py-1 font-semibold text-white"
                             >
-                              {grades[sub.id]?.saving ? "Сохраняем…" : "Сохранить"}
+                              {grades[sub.id]?.saving ? "Сохраняем:" : "Сохранить"}
                             </button>
                           </div>
 

@@ -78,14 +78,6 @@ export default async function ProfilePage() {
     user.user_metadata?.full_name ||
     'Пользователь';
 
-  const roleLabel = isSuperadmin
-    ? 'Суперадмин'
-    : isTeacher
-      ? 'Преподаватель'
-      : isStudent
-        ? 'Студент'
-        : 'Пользователь';
-
   const inn = studentRow?.inn ? String(studentRow.inn) : '—';
   const groupName = user.user_metadata?.group_name || '—';
   const courseName = user.user_metadata?.course_name || '—';
@@ -110,9 +102,6 @@ export default async function ProfilePage() {
                 )}
               </div>
               <div>
-                <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-sm font-semibold uppercase tracking-[0.1em] text-slate-300">
-                  {roleLabel}
-                </div>
                 {isStudent && (
                   <div className="mt-1 text-slate-300 space-y-1 text-sm">
                     <div>Курс: {courseName}</div>
@@ -122,13 +111,6 @@ export default async function ProfilePage() {
               </div>
             </div>
 
-            {isStudent && (
-              <div className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-2 text-sm text-slate-100">
-                <IdCard size={16} />
-                ИИН: {inn}
-              </div>
-            )}
-
             <div className="flex flex-wrap gap-3">
               <Link
                 href="/profile/edit"
@@ -136,12 +118,6 @@ export default async function ProfilePage() {
               >
                 Редактировать профиль
                 <ArrowRight size={16} />
-              </Link>
-              <Link
-                href="/profile/onboarding"
-                className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-4 py-3 text-sm font-semibold text-violet-200 hover:bg-white/10"
-              >
-                Обновить ИИН/ФИО
               </Link>
             </div>
           </div>
@@ -166,23 +142,6 @@ export default async function ProfilePage() {
           </div>
         </div>
       </section>
-
-      {isStudent && (
-        <section className="grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-6 md:grid-cols-3">
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Группа</p>
-            <p className="text-lg font-semibold">{groupName}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Курс</p>
-            <p className="text-lg font-semibold">{courseName}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Город</p>
-            <p className="text-lg font-semibold">{city}</p>
-          </div>
-        </section>
-      )}
     </div>
   );
 }

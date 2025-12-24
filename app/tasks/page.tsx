@@ -152,8 +152,8 @@ export default function TasksPage() {
           task_id: task.id,
           user_id: user.id,
           file_path: path,
-          description: notes[task.id]?.trim() || null,
-          comment: notes[task.id]?.trim() || null,
+          description: notes[task.id]?.trim() || null, // комментарий ученика
+          comment: null, // комментарий преподавателя хранится здесь
         })
         .select("id,task_id,user_id,file_path,created_at,score,comment,description")
         .single();
@@ -326,18 +326,17 @@ export default function TasksPage() {
                               timeStyle: "short",
                             }).format(new Date(sub.created_at))}
                           </span>
-                          {(sub.score ?? sub.comment) && (
-                            <span className="text-xs text-slate-200">
-                              {sub.score != null && (
-                                <span className={getScoreColor(sub.score)}>
-                                  Оценка: {sub.score}
-                                </span>
-                              )}
-                              {sub.comment
-                                ? `${sub.score != null ? " · " : ""}${sub.comment}`
-                                : ""}
-                            </span>
-                          )}
+                          <div className="flex flex-col gap-1 text-xs text-slate-200">
+                            {sub.score != null && (
+                              <span className={getScoreColor(sub.score)}>Оценка: {sub.score}</span>
+                            )}
+                            {sub.comment && (
+                              <span className="text-emerald-200">Комментарий преподавателя: {sub.comment}</span>
+                            )}
+                            {sub.description && (
+                              <span className="text-slate-300">Мой комментарий: {sub.description}</span>
+                            )}
+                          </div>
                           <div className="flex items-center gap-2">
                             {sub.file_url ? (
                               <a
