@@ -54,6 +54,12 @@ type StudentRow = {
   user_id: string | null;
 };
 
+type EnrollmentRow = {
+  student_inn: number;
+  course_id: number;
+  courses: { group_id: number } | null;
+};
+
 type TeacherForm = {
   firstName: string;
   lastName: string;
@@ -103,6 +109,20 @@ export default function AdminPage() {
   const [sessions, setSessions] = useState<SessionRow[]>([]);
   const [students, setStudents] = useState<StudentRow[]>([]);
   const [studentSearch, setStudentSearch] = useState("");
+  const [newGroup, setNewGroup] = useState({ name: "", speciality: "" });
+  const [assign, setAssign] = useState({ groupId: "", courseId: "", studentInn: "" });
+  const [deletingStudent, setDeletingStudent] = useState<Record<number, boolean>>({});
+  const [enrollments, setEnrollments] = useState<EnrollmentRow[]>([]);
+  const [groupFilter, setGroupFilter] = useState<string>("");
+  const [editStudent, setEditStudent] = useState<StudentRow | null>(null);
+  const [editForm, setEditForm] = useState({
+    inn: "",
+    Name: "",
+    Last_Name: "",
+    Middle_Name: "",
+    groupId: "",
+    courseId: "",
+  });
 
   const [courseForm, setCourseForm] = useState<CourseForm>(emptyCourseForm);
   const [sessionForm, setSessionForm] = useState<SessionForm>(emptySessionForm);
@@ -175,6 +195,7 @@ export default function AdminPage() {
       { data: studs },
       { data: crs },
       { data: sess, error: sessErr },
+      { data: enr },
     ] = await Promise.all([
       supabase.from("subjects").select("id,name,code").order("name", { ascending: true }),
       supabase.from("study_groups").select("id,name").order("name", { ascending: true }),
@@ -197,8 +218,12 @@ export default function AdminPage() {
         supabase
           .from("course_sessions")
           .select("id,course_id,starts_at,session_type,topic,location,status")
-          .order("starts_at", { ascending: true })
-          .limit(200),
+        .order("starts_at", { ascending: true })
+        .limit(200),
+      supabase
+        .from("enrollments")
+        .select("student_inn,course_id,courses!inner(group_id)")
+        .limit(500),
       ]);
 
     const subjectOptions = (subj ?? []).map((s) => ({
@@ -232,6 +257,7 @@ export default function AdminPage() {
     );
     setStudents((studs ?? []) as StudentRow[]);
     setCourses(coursesData);
+    setEnrollments((enr ?? []) as EnrollmentRow[]);
     if (sessErr) setError(sessErr.message);
     setSessions((sess ?? []) as SessionRow[]);
 
@@ -319,6 +345,7 @@ export default function AdminPage() {
   };
 
   const handlePromoteStudent = async (s: StudentRow) => {
+    if (!window.confirm("Сделать этого студента преподавателем?")) return;
     setMessage(null);
     const payload = {
       first_name: s.Name,
@@ -334,6 +361,126 @@ export default function AdminPage() {
     setMessage("Студент добавлен в учителя");
     load();
   };
+
+  const handleCreateGroup = async () => {
+    setMessage(null);
+    if (!newGroup.name.trim()) {
+      setError("Введите название группы");
+      return;
+    }
+    const res = await fetch("/api/admin/groups", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: newGroup.name.trim(), speciality: newGroup.speciality }),
+    });
+    if (!res.ok) {
+      const t = await res.json().catch(() => ({}));
+      setError(t.error ?? "Не удалось создать группу");
+      return;
+    }
+    setNewGroup({ name: "", speciality: "" });
+    setMessage("Группа создана");
+    load();
+  };
+
+  const handleAssignStudentToGroup = async () => {
+    setMessage(null);
+    if (!assign.groupId || !assign.courseId || !assign.studentInn) {
+      setError("Заполните группу, курс и студента");
+      return;
+    }
+    const payload = {
+      student_inn: Number(assign.studentInn),
+      course_id: Number(assign.courseId),
+      status: "active",
+    };
+    const { error } = await supabase.from("enrollments").insert(payload);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setAssign({ groupId: "", courseId: "", studentInn: "" });
+    setMessage("Студент добавлен в группу (через курс)");
+    load();
+  };
+
+  const handleDeleteStudent = async (inn: number) => {
+    if (!window.confirm("Удалить студента? Это действие необратимо.")) return;
+    setDeletingStudent((p) => ({ ...p, [inn]: true }));
+    setError(null);
+    const { error } = await supabase.from("students").delete().eq("inn", inn);
+    if (error) {
+      setError(error.message);
+      setDeletingStudent((p) => ({ ...p, [inn]: false }));
+      return;
+    }
+    setMessage("Студент удален");
+    setDeletingStudent((p) => ({ ...p, [inn]: false }));
+    load();
+  };
+
+  const handleOpenEdit = (s: StudentRow) => {
+    const currentEnrollment = enrollments.find((e) => e.student_inn === s.inn);
+    const currentGroupId = currentEnrollment?.courses?.group_id
+      ? String(currentEnrollment.courses.group_id)
+      : "";
+    const currentCourseId = currentEnrollment?.course_id ? String(currentEnrollment.course_id) : "";
+
+    setEditStudent(s);
+    setEditForm({
+      inn: String(s.inn),
+      Name: s.Name,
+      Last_Name: s.Last_Name,
+      Middle_Name: s.Middle_Name ?? "",
+      groupId: currentGroupId,
+      courseId: currentCourseId,
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editStudent) return;
+    setMessage(null);
+    const { error } = await supabase
+      .from("students")
+      .update({
+        Name: editForm.Name.trim(),
+        Last_Name: editForm.Last_Name.trim(),
+        Middle_Name: editForm.Middle_Name.trim() || null,
+      })
+      .eq("inn", editStudent.inn);
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    // Обновим зачисление: удалим старые и добавим новое, если выбрано
+    if (editForm.courseId) {
+      const payload = {
+        student_inn: Number(editForm.inn),
+        course_id: Number(editForm.courseId),
+        status: "active" as const,
+      };
+      // удаляем старые
+      await supabase.from("enrollments").delete().eq("student_inn", Number(editForm.inn));
+      const { error: enrErr } = await supabase.from("enrollments").insert(payload);
+      if (enrErr) {
+        setError(enrErr.message);
+        return;
+      }
+    }
+    setMessage("Студент обновлен");
+    setEditStudent(null);
+    load();
+  };
+
+  const groupMembersSet = new Set(
+    enrollments
+      .filter((e) => (groupFilter ? String(e.courses?.group_id) === groupFilter : true))
+      .map((e) => e.student_inn)
+  );
+
+  const studentsByGroup = students.filter((s) => groupMembersSet.has(s.inn));
+  const courseById = new Map(courses.map((c) => [c.id, c]));
+  const groupById = new Map(groups.map((g) => [g.id, g.label]));
 
   const filteredStudents = students.filter((s) => {
     const q = studentSearch.trim().toLowerCase();
@@ -382,6 +529,110 @@ export default function AdminPage() {
       </header>
 
       {isAdmin && (
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-semibold">Группы</h2>
+              <p className="text-sm text-slate-300">Создавайте учебные группы и смотрите список существующих.</p>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-3">
+            <input
+              value={newGroup.name}
+              onChange={(e) => setNewGroup((p) => ({ ...p, name: e.target.value }))}
+              placeholder="Название группы"
+              className="rounded-xl bg-white/10 p-3 text-white"
+            />
+            <input
+              value={newGroup.speciality}
+              onChange={(e) => setNewGroup((p) => ({ ...p, speciality: e.target.value }))}
+              placeholder="Специальность (опционально)"
+              className="rounded-xl bg-white/10 p-3 text-white"
+            />
+            <button
+              onClick={handleCreateGroup}
+              className="inline-flex items-center gap-2 rounded-xl bg-violet-500/80 px-4 py-2 text-sm font-semibold text-white"
+            >
+              <Plus size={16} />
+              Создать группу
+            </button>
+          </div>
+
+          <div className="overflow-hidden rounded-2xl border border-white/10">
+            <table className="w-full border-collapse text-left text-sm text-slate-100">
+              <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-slate-300">
+                <tr>
+                  <th className="px-3 py-2">ID</th>
+                  <th className="px-3 py-2">Название</th>
+                </tr>
+              </thead>
+              <tbody>
+                {groups.map((g) => (
+                  <tr key={g.id} className="odd:bg-white/5">
+                    <td className="px-3 py-2">{g.id}</td>
+                    <td className="px-3 py-2">{g.label}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {isAdmin && (
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-4">
+          <h2 className="text-2xl font-semibold">Добавить студента в группу (через курс)</h2>
+          <div className="grid gap-3 md:grid-cols-3">
+            <select
+              value={assign.groupId}
+              onChange={(e) => setAssign((p) => ({ ...p, groupId: e.target.value, courseId: "" }))}
+              className="rounded-xl bg-white/10 p-3 text-white"
+            >
+              <option value="">Группа</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id} className="bg-slate-900">
+                  {g.label}
+                </option>
+              ))}
+            </select>
+            <select
+              value={assign.courseId}
+              onChange={(e) => setAssign((p) => ({ ...p, courseId: e.target.value }))}
+              className="rounded-xl bg-white/10 p-3 text-white"
+            >
+              <option value="">Курс этой группы</option>
+              {courses
+                .filter((c) => assign.groupId && String(c.group_id) === assign.groupId)
+                .map((c) => (
+                  <option key={c.id} value={c.id} className="bg-slate-900">
+                    {c.id} — {c.subjects?.name ?? "Без предмета"}
+                  </option>
+                ))}
+            </select>
+            <select
+              value={assign.studentInn}
+              onChange={(e) => setAssign((p) => ({ ...p, studentInn: e.target.value }))}
+              className="rounded-xl bg-white/10 p-3 text-white"
+            >
+              <option value="">Студент</option>
+              {students.map((s) => (
+                <option key={s.inn} value={s.inn} className="bg-slate-900">
+                  {[s.Last_Name, s.Name, s.Middle_Name].filter(Boolean).join(" ")} ({s.inn})
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={handleAssignStudentToGroup}
+            className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/80 px-4 py-2 text-sm font-semibold text-white"
+          >
+            <Plus size={16} />
+            Добавить
+          </button>
+        </section>
+      )}
+
+      {isAdmin && (
         <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
@@ -398,25 +649,101 @@ export default function AdminPage() {
             <table className="w-full border-collapse text-left text-sm text-slate-100">
               <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-slate-300">
                 <tr>
+              <th className="px-3 py-2">ИНН</th>
+              <th className="px-3 py-2">ФИО</th>
+              <th className="px-3 py-2">Группа</th>
+              <th className="px-3 py-2">Курс</th>
+              <th className="px-3 py-2">Действие</th>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredStudents.map((s) => (
+              <tr key={s.inn} className="odd:bg-white/5">
+                <td className="px-3 py-2">{s.inn}</td>
+                <td className="px-3 py-2">
+                  {[s.Last_Name, s.Name, s.Middle_Name].filter(Boolean).join(" ")}
+                </td>
+                <td className="px-3 py-2">
+                  {(() => {
+                    const enr = enrollments.find((e) => e.student_inn === s.inn);
+                    if (!enr) return "-";
+                    const gid = enr.courses?.group_id;
+                    return gid ? groupById.get(gid) || `Группа ${gid}` : "-";
+                  })()}
+                </td>
+                <td className="px-3 py-2">
+                  {(() => {
+                    const enr = enrollments.find((e) => e.student_inn === s.inn);
+                    if (!enr) return "-";
+                    const course = courseById.get(enr.course_id);
+                    return course?.subjects?.name || `Курс ${enr.course_id}`;
+                  })()}
+                </td>
+                <td className="px-3 py-2">
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleOpenEdit(s)}
+                      className="rounded-xl border border-white/30 px-3 py-1 text-xs font-semibold text-white"
+                    >
+                      Редактировать
+                    </button>
+                    <button
+                      onClick={() => handlePromoteStudent(s)}
+                      className="rounded-xl bg-emerald-500/80 px-3 py-1 text-xs font-semibold text-white"
+                    >
+                      В учителя
+                    </button>
+                    <button
+                      onClick={() => handleDeleteStudent(s.inn)}
+                      disabled={deletingStudent[s.inn]}
+                      className="rounded-xl bg-red-500/80 px-3 py-1 text-xs font-semibold text-white disabled:opacity-60"
+                    >
+                      {deletingStudent[s.inn] ? "Удаляем..." : "Удалить"}
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        </div>
+      </section>
+      )}
+
+      {isAdmin && (
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 className="text-2xl font-semibold">Студенты по группе</h2>
+              <p className="text-sm text-slate-300">Выберите группу и смотрите всех зачисленных студентов.</p>
+            </div>
+            <select
+              value={groupFilter}
+              onChange={(e) => setGroupFilter(e.target.value)}
+              className="rounded-xl bg-white/10 p-3 text-white"
+            >
+              <option value="">Все группы</option>
+              {groups.map((g) => (
+                <option key={g.id} value={g.id} className="bg-slate-900">
+                  {g.label}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="overflow-hidden rounded-2xl border border-white/10">
+            <table className="w-full border-collapse text-left text-sm text-slate-100">
+              <thead className="bg-white/5 text-xs uppercase tracking-[0.2em] text-slate-300">
+                <tr>
                   <th className="px-3 py-2">ИНН</th>
                   <th className="px-3 py-2">ФИО</th>
-                  <th className="px-3 py-2">Действие</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredStudents.map((s) => (
+                {(groupFilter ? studentsByGroup : students).map((s) => (
                   <tr key={s.inn} className="odd:bg-white/5">
                     <td className="px-3 py-2">{s.inn}</td>
                     <td className="px-3 py-2">
                       {[s.Last_Name, s.Name, s.Middle_Name].filter(Boolean).join(" ")}
-                    </td>
-                    <td className="px-3 py-2">
-                      <button
-                        onClick={() => handlePromoteStudent(s)}
-                        className="rounded-xl bg-emerald-500/80 px-3 py-1 text-xs font-semibold text-white"
-                      >
-                        В учителя
-                      </button>
                     </td>
                   </tr>
                 ))}
@@ -424,6 +751,94 @@ export default function AdminPage() {
             </table>
           </div>
         </section>
+      )}
+
+      {editStudent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+          <div className="w-full max-w-lg space-y-4 rounded-2xl border border-white/10 bg-slate-900 p-6 text-white shadow-xl">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xl font-semibold">Редактировать студента</h3>
+              <button
+                onClick={() => setEditStudent(null)}
+                className="rounded-full border border-white/20 px-3 py-1 text-sm"
+              >
+                Закрыть
+              </button>
+            </div>
+            <div className="grid gap-3 md:grid-cols-2">
+              <input
+                value={editForm.Last_Name}
+                onChange={(e) => setEditForm((p) => ({ ...p, Last_Name: e.target.value }))}
+                placeholder="Фамилия"
+                className="rounded-xl bg-white/10 p-3 text-white"
+              />
+              <input
+                value={editForm.Name}
+                onChange={(e) => setEditForm((p) => ({ ...p, Name: e.target.value }))}
+                placeholder="Имя"
+                className="rounded-xl bg-white/10 p-3 text-white"
+              />
+              <input
+                value={editForm.Middle_Name}
+                onChange={(e) => setEditForm((p) => ({ ...p, Middle_Name: e.target.value }))}
+                placeholder="Отчество"
+                className="rounded-xl bg-white/10 p-3 text-white md:col-span-2"
+              />
+              <select
+                value={editForm.groupId}
+                onChange={(e) =>
+                  setEditForm((p) => ({
+                    ...p,
+                    groupId: e.target.value,
+                    courseId: "",
+                  }))
+                }
+                className="rounded-xl bg-white/10 p-3 text-white"
+              >
+                <option value="">Группа</option>
+                {groups.map((g) => (
+                  <option key={g.id} value={g.id} className="bg-slate-900">
+                    {g.label}
+                  </option>
+                ))}
+              </select>
+              <select
+                value={editForm.courseId}
+                onChange={(e) => setEditForm((p) => ({ ...p, courseId: e.target.value }))}
+                className="rounded-xl bg-white/10 p-3 text-white"
+              >
+                <option value="">Курс</option>
+                {courses
+                  .filter((c) => !editForm.groupId || String(c.group_id) === editForm.groupId)
+                  .map((c) => (
+                    <option key={c.id} value={c.id} className="bg-slate-900">
+                      {c.id} — {c.subjects?.name ?? "Без предмета"}
+                    </option>
+                  ))}
+              </select>
+              <input
+                value={editForm.inn}
+                disabled
+                className="rounded-xl bg-white/5 p-3 text-white md:col-span-2"
+              />
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveEdit}
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-500/80 px-4 py-2 text-sm font-semibold text-white"
+              >
+                <Save size={16} />
+                Сохранить
+              </button>
+              <button
+                onClick={() => setEditStudent(null)}
+                className="inline-flex items-center gap-2 rounded-xl border border-white/30 px-4 py-2 text-sm font-semibold text-white"
+              >
+                Отмена
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {isAdmin && (
