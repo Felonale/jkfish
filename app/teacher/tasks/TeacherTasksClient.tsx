@@ -22,10 +22,24 @@ type Submission = {
   file_path: string | null;
   file_url?: string | null;
   created_at: string;
+  score?: number | null;
+  comment?: string | null;
 };
+
+type GradeDraft = { score: string; comment: string; saving: boolean };
 
 export default function TeacherTasksClient() {
   const supabase = useMemo(() => createClient(), []);
+
+  const signUrl = async (path: string | null): Promise<string | null> => {
+    if (!path) return null;
+    const { data, error } = await supabase.storage.from("tasks").createSignedUrl(path, 60 * 60);
+    if (error) {
+      console.error("signUrl error", error.message);
+      return null;
+    }
+    return data?.signedUrl ?? null;
+  };
 
   const [tasks, setTasks] = useState<Task[]>([]);
   const [submissions, setSubmissions] = useState<Record<string, Submission[]>>({});
@@ -38,9 +52,11 @@ export default function TeacherTasksClient() {
     deadline: "",
     file: null as File | null,
   });
+  const [grades, setGrades] = useState<Record<string, GradeDraft>>({});
 
   const load = async () => {
     setError(null);
+
     const { data: taskRows, error: taskErr } = await supabase
       .from("tasks")
       .select("id,title,description,deadline,file_path,created_at")
@@ -53,24 +69,28 @@ export default function TeacherTasksClient() {
     }
 
     const tasksWithUrls =
-      taskRows?.map((t) => ({
-        ...t,
-        file_url: t.file_path
-          ? supabase.storage.from("tasks").getPublicUrl(t.file_path).data.publicUrl
-          : null,
-      })) ?? [];
+      taskRows
+        ? await Promise.all(
+            taskRows.map(async (t) => ({
+              ...t,
+              file_url: await signUrl(t.file_path),
+            })),
+          )
+        : [];
     setTasks(tasksWithUrls);
 
     const { data: subsRows } = await supabase
       .from("task_submissions")
-      .select("id,task_id,user_id,file_path,created_at");
+      .select("id,task_id,user_id,file_path,created_at,score,comment");
 
-    const subs = (subsRows ?? []).map((s) => ({
-      ...s,
-      file_url: s.file_path
-        ? supabase.storage.from("tasks").getPublicUrl(s.file_path).data.publicUrl
-        : null,
-    }));
+    const subs = subsRows
+      ? await Promise.all(
+          subsRows.map(async (s) => ({
+            ...s,
+            file_url: await signUrl(s.file_path),
+          })),
+        )
+      : [];
 
     const byTask: Record<string, Submission[]> = {};
     subs.forEach((s) => {
@@ -118,9 +138,7 @@ export default function TeacherTasksClient() {
 
       const newTask: Task = {
         ...data!,
-        file_url: filePath
-          ? supabase.storage.from("tasks").getPublicUrl(filePath).data.publicUrl
-          : null,
+        file_url: await signUrl(filePath),
       };
 
       setTasks((prev) => [newTask, ...prev]);
@@ -132,6 +150,41 @@ export default function TeacherTasksClient() {
     }
   };
 
+  const updateGradeDraft = (id: string, patch: Partial<GradeDraft>) => {
+    setGrades((prev) => ({
+      ...prev,
+      [id]: { score: prev[id]?.score ?? "", comment: prev[id]?.comment ?? "", saving: false, ...patch },
+    }));
+  };
+
+  const saveGrade = async (submission: Submission) => {
+    const draft = grades[submission.id] ?? { score: "", comment: "", saving: false };
+    const scoreNum = draft.score ? Number(draft.score) : null;
+    if (draft.score && !Number.isFinite(scoreNum)) {
+      setError("Оценка должна быть числом");
+      return;
+    }
+    updateGradeDraft(submission.id, { saving: true });
+
+    const res = await fetch("/api/grades", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ submissionId: submission.id, score: scoreNum, comment: draft.comment }),
+    });
+    updateGradeDraft(submission.id, { saving: false });
+    if (!res.ok) {
+      const t = await res.json().catch(() => ({}));
+      setError(t.error ?? "Не удалось сохранить оценку");
+      return;
+    }
+    const updated = (await res.json()) as Submission;
+    setSubmissions((prev) => {
+      const list = prev[submission.task_id] ?? [];
+      const next = list.map((s) => (s.id === submission.id ? updated : s));
+      return { ...prev, [submission.task_id]: next };
+    });
+  };
+
   if (loading) return <div className="text-white">Загрузка…</div>;
 
   return (
@@ -139,7 +192,7 @@ export default function TeacherTasksClient() {
       <header className="rounded-3xl border border-white/10 bg-white/5 p-6">
         <h1 className="text-3xl font-semibold">Задания (преподаватель)</h1>
         <p className="text-sm text-slate-300">
-          Создавайте задания, прикрепляйте файлы (хранятся в бакете storage.tasks). Студенты увидят их на своей странице задач и смогут отправлять решения, которые сохраняются как записи в task_submissions + файлы в том же бакете.
+          Создавайте задания, прикрепляйте материалы (бакет storage.tasks). Студенты отправляют решения в task_submissions, здесь можно проверить и выставить оценку.
         </p>
       </header>
 
@@ -149,7 +202,7 @@ export default function TeacherTasksClient() {
         </div>
       )}
 
-      <section className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-4">
+      <section className="space-y-4 rounded-3xl border border-white/10 bg-white/5 p-6">
         <h2 className="text-xl font-semibold">Новое задание</h2>
         <div className="grid gap-3 md:grid-cols-2">
           <input
@@ -247,28 +300,62 @@ export default function TeacherTasksClient() {
                       .map((sub) => (
                         <div
                           key={sub.id}
-                          className="mt-2 flex flex-wrap items-center justify-between gap-2 rounded-lg border border-white/5 bg-white/5 px-3 py-2"
+                          className="mt-2 space-y-2 rounded-lg border border-white/5 bg-white/5 px-3 py-2"
                         >
-                          <div>
-                            <p className="text-sm font-semibold">{sub.user_id}</p>
-                            <p className="text-xs text-slate-400">
-                              {new Intl.DateTimeFormat("ru-RU", {
-                                dateStyle: "medium",
-                                timeStyle: "short",
-                              }).format(new Date(sub.created_at))}
-                            </p>
+                          <div className="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                              <p className="text-sm font-semibold">{sub.user_id}</p>
+                              <p className="text-xs text-slate-400">
+                                {new Intl.DateTimeFormat("ru-RU", {
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                }).format(new Date(sub.created_at))}
+                              </p>
+                            </div>
+                            {sub.file_url ? (
+                              <a
+                                href={sub.file_url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-cyan-300 underline underline-offset-4"
+                              >
+                                Открыть файл
+                              </a>
+                            ) : (
+                              <span className="text-slate-500">Файл недоступен</span>
+                            )}
                           </div>
-                          {sub.file_url ? (
-                            <a
-                              href={sub.file_url}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-cyan-300 underline underline-offset-4"
+
+                          <div className="grid gap-2 md:grid-cols-[120px_1fr_140px] text-xs text-white">
+                            <input
+                              type="number"
+                              placeholder="Оценка"
+                              value={grades[sub.id]?.score ?? (sub.score ?? "").toString()}
+                              onChange={(e) => updateGradeDraft(sub.id, { score: e.target.value })}
+                              className="rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-sm"
+                            />
+                            <input
+                              placeholder="Комментарий"
+                              value={grades[sub.id]?.comment ?? (sub.comment ?? "")}
+                              onChange={(e) =>
+                                updateGradeDraft(sub.id, { comment: e.target.value })
+                              }
+                              className="rounded-lg border border-white/10 bg-black/30 px-2 py-1 text-sm"
+                            />
+                            <button
+                              onClick={() => saveGrade(sub)}
+                              disabled={grades[sub.id]?.saving}
+                              className="rounded-lg bg-emerald-500 px-3 py-1 font-semibold text-white"
                             >
-                              Открыть файл
-                            </a>
-                          ) : (
-                            <span className="text-slate-500">Файл недоступен</span>
+                              {grades[sub.id]?.saving ? "Сохраняем…" : "Сохранить"}
+                            </button>
+                          </div>
+
+                          {(sub.score ?? sub.comment) && (
+                            <div className="text-xs text-emerald-200">
+                              {sub.score != null ? `Оценка: ${sub.score}` : ""}
+                              {sub.comment ? ` · ${sub.comment}` : ""}
+                            </div>
                           )}
                         </div>
                       ))

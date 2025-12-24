@@ -94,74 +94,81 @@ export default async function ProfilePage() {
   const phone = user.user_metadata?.phone || '—';
 
   return (
-    <div className="space-y-8">
-      <section className="flex flex-wrap justify-between gap-6 rounded-3xl border border-white/10 bg-white/5 p-6 text-white">
-        <div className="space-y-3">
-          <p className="text-xs uppercase tracking-[0.35em] text-slate-300">Профиль</p>
-          <h1 className="text-4xl font-semibold text-white">{displayName}</h1>
+    <div className="space-y-8 text-white">
+      <section className="rounded-3xl border border-white/10 bg-gradient-to-r from-slate-900/70 via-slate-900/50 to-slate-800/60 p-6">
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="space-y-3">
+            <p className="text-xs uppercase tracking-[0.35em] text-slate-300">Профиль</p>
+            <h1 className="text-4xl font-semibold text-white">{displayName}</h1>
 
-          <div className="flex gap-3">
-            <div className="w-max self-center">
-              {isTeacher || isSuperadmin ? (
-                <Shield className="text-emerald-200" size={26} />
-              ) : (
-                <IdCard className="text-slate-200" size={26} />
-              )}
-            </div>
-            <div>
-              <div className="inline-flex items-center gap-2 rounded-full py-1 text-sm font-semibold uppercase tracking-[0.1em] text-slate-300">
-                {roleLabel}
+            <div className="flex gap-3">
+              <div className="w-max self-center">
+                {isTeacher || isSuperadmin ? (
+                  <Shield className="text-emerald-200" size={26} />
+                ) : (
+                  <IdCard className="text-slate-200" size={26} />
+                )}
               </div>
+              <div>
+                <div className="inline-flex items-center gap-2 rounded-full bg-white/5 px-3 py-1 text-sm font-semibold uppercase tracking-[0.1em] text-slate-300">
+                  {roleLabel}
+                </div>
+                {isStudent && (
+                  <div className="mt-1 text-slate-300 space-y-1 text-sm">
+                    <div>Курс: {courseName}</div>
+                    <div>Группа: {groupName}</div>
+                  </div>
+                )}
+              </div>
+            </div>
 
-              {isStudent && (
-                <>
-                  <div className="text-slate-300">Курс: {courseName}</div>
-                  <div className="text-slate-300">Группа: {groupName}</div>
-                </>
-              )}
+            {isStudent && (
+              <div className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-2 text-sm text-slate-100">
+                <IdCard size={16} />
+                ИИН: {inn}
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-3">
+              <Link
+                href="/profile/edit"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
+              >
+                Редактировать профиль
+                <ArrowRight size={16} />
+              </Link>
+              <Link
+                href="/profile/onboarding"
+                className="inline-flex items-center gap-2 rounded-2xl border border-white/20 px-4 py-3 text-sm font-semibold text-violet-200 hover:bg-white/10"
+              >
+                Обновить ИИН/ФИО
+              </Link>
             </div>
           </div>
 
-          {isStudent && (
-            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-2 text-sm text-slate-100">
+          <div className="grid min-w-fit max-w-96 flex-1 grid-rows-1 gap-3 text-sm text-slate-100 sm:grid-rows-4">
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <Mail size={16} />
+              <span className="truncate">{email}</span>
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
               <IdCard size={16} />
               ИИН: {inn}
             </div>
-          )}
-
-          <div className="w-full">
-            <Link
-              href="/profile/edit"
-              className="inline-flex items-center gap-2 rounded-2xl border border-white/30 px-4 py-3 text-sm font-semibold text-white hover:bg-white/10"
-            >
-              Редактировать профиль
-              <ArrowRight size={16} />
-            </Link>
-          </div>
-        </div>
-
-        <div className="grid min-w-fit max-w-96 flex-1 grid-rows-1 gap-3 text-sm text-slate-100 sm:grid-rows-4">
-          <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <Mail size={16} />
-            {email}
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <IdCard size={16} />
-            ИИН: {inn}
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <MapPin size={16} />
-            {city}
-          </div>
-          <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <Phone size={16} />
-            {phone}
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <MapPin size={16} />
+              {city}
+            </div>
+            <div className="inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <Phone size={16} />
+              {phone}
+            </div>
           </div>
         </div>
       </section>
 
       {isStudent && (
-        <section className="grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-6 text-white md:grid-cols-3">
+        <section className="grid gap-3 rounded-3xl border border-white/10 bg-white/5 p-6 md:grid-cols-3">
           <div className="space-y-1">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Группа</p>
             <p className="text-lg font-semibold">{groupName}</p>
