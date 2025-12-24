@@ -28,6 +28,13 @@ type Submission = {
   description?: string | null;
 };
 
+const getScoreColor = (score: number) => {
+  if (score <= 50) return "text-red-300";
+  if (score <= 69) return "text-orange-300";
+  if (score <= 89) return "text-yellow-200";
+  return "text-emerald-300";
+};
+
 export default function TasksPage() {
   const supabase = useMemo(() => createClient(), []);
   const router = useRouter();
@@ -320,9 +327,15 @@ export default function TasksPage() {
                             }).format(new Date(sub.created_at))}
                           </span>
                           {(sub.score ?? sub.comment) && (
-                            <span className="text-xs text-emerald-200">
-                              {sub.score != null ? `Оценка: ${sub.score}` : ""}{" "}
-                              {sub.comment ? `· ${sub.comment}` : ""}
+                            <span className="text-xs text-slate-200">
+                              {sub.score != null && (
+                                <span className={getScoreColor(sub.score)}>
+                                  Оценка: {sub.score}
+                                </span>
+                              )}
+                              {sub.comment
+                                ? `${sub.score != null ? " · " : ""}${sub.comment}`
+                                : ""}
                             </span>
                           )}
                           <div className="flex items-center gap-2">
