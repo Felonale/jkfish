@@ -27,6 +27,7 @@ export default function ViewNoteClient() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [tags, setTags] = useState('');
+  const [editingContent, setEditingContent] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
@@ -38,9 +39,7 @@ export default function ViewNoteClient() {
         .select('id,title,content,tags,created_at,updated_at')
         .eq('id', id)
         .single();
-      if (error) {
-        console.error('Ошибка загрузки заметки:', error);
-      }
+      if (error) console.error('Ошибка загрузки заметки:', error);
       if (data) {
         setNote(data);
         setTitle(data.title);
@@ -146,22 +145,33 @@ export default function ViewNoteClient() {
           </p>
         </header>
 
-        <div className="grid gap-3 md:grid-cols-2">
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-slate-300">Текст заметки</label>
+        <div className="flex flex-col gap-2">
+          <label className="text-sm text-slate-300">Текст заметки</label>
+          {editingContent ? (
             <textarea
               value={content}
               onChange={e => setContent(e.target.value)}
-              onBlur={saveEdit}
+              onBlur={() => {
+                saveEdit();
+                setEditingContent(false);
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                  saveEdit();
+                  setEditingContent(false);
+                }
+              }}
               className="min-h-[240px] rounded-xl border border-white/10 bg-slate-800 p-3 text-white focus:outline-none focus:border-violet-400"
+              autoFocus
             />
-          </div>
-          <div className="flex flex-col gap-2">
-            <label className="text-sm text-slate-300">Предпросмотр</label>
-            <div className="prose prose-invert max-w-none rounded-xl border border-white/10 bg-slate-900/60 p-3 text-white">
+          ) : (
+            <div
+              onClick={() => setEditingContent(true)}
+              className="prose prose-invert max-w-none rounded-xl border border-white/10 bg-slate-900/60 p-3 text-white cursor-text"
+            >
               <ReactMarkdown>{content || '_Нет текста_'}</ReactMarkdown>
             </div>
-          </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-4 pt-4">

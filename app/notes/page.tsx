@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Eye, Trash2, FileDown, X } from 'lucide-react';
+import { Trash2, FileDown, X, UploadCloud } from 'lucide-react';
+import { readDocxFile } from '@/lib/docxParser';
 
 type Note = {
   id: string;
@@ -45,13 +46,12 @@ export default function NotesPage() {
         .from('notes')
         .select('id,title,content,tags,created_at,updated_at')
         .order('updated_at', { ascending: false });
-      if (error) console.error('Ошибка загрузки конспектов:', error);
+      if (error) console.error('Ошибка загрузки заметок:', error);
       if (data) setNotes(data as Note[]);
       setLoading(false);
     };
     fetchNotes();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, [router, supabase]);
 
   const generateDescription = (text: string) => {
     const sentences = text.match(/[^.!?]+[.!?]/g);
@@ -100,30 +100,33 @@ export default function NotesPage() {
     return 0;
   });
 
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="skeleton h-32 w-full"></div>
-        ))}
-      </div>
-    );
-  }
+  if (loading) return <div className="text-white">Загрузка...</div>;
 
   return (
-    <div className="space-y-6 text-white animate-fadeInUp">
-      <header className="space-y-4">
-        <div className="rounded-xl bg-slate-900 p-6 text-white shadow-lg hover:shadow-xl transition">
-          <h1 className="text-2xl font-bold">Держите все конспекты рядом со спринтом</h1>
-          <p className="text-slate-400">
-            Легкая система управления через Subjex.me, так что вы можете использовать её на любом устройстве.
-          </p>
+    <main className="space-y-6 text-white">
+      <header className="rounded-3xl border border-white/10 bg-white/5 p-6 space-y-4">
+        <h1 className="text-3xl font-semibold">Заметки</h1>
+        <p className="text-sm text-slate-300">
+          Здесь можно хранить и редактировать свои заметки. Импортируйте файлы .md, .txt, .docx.
+        </p>
+        <div className="flex flex-wrap gap-3">
           <button
             onClick={() => router.push('/notes/new')}
-            className="mt-4 rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold hover:bg-violet-600 transition-transform hover:scale-105"
+            className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-600 transition-transform hover:scale-105"
           >
-            + Добавить конспект
+            + Добавить заметку
           </button>
+          <FileImporter
+            onImport={async (title, content) => {
+              const { error } = await supabase.from('notes').insert({ title, content });
+              if (error) {
+                console.error('Ошибка сохранения заметки:', error);
+                alert('Не удалось сохранить заметку');
+              } else {
+                router.refresh?.();
+              }
+            }}
+          />
         </div>
 
         <div className="relative w-full">
@@ -132,7 +135,7 @@ export default function NotesPage() {
             placeholder="Поиск по заголовку, содержимому и тегам..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            className="w-full rounded-xl bg-slate-800 p-3 pl-10 text-white placeholder-slate-400 focus:ring-2 focus:ring-violet-500 transition"
+            className="w-full rounded-xl border border-white/10 bg-white/5 p-3 pl-10 text-sm text-white placeholder:text-slate-500"
           />
           <span className="absolute left-3 top-3 text-slate-400">🔍</span>
         </div>
@@ -146,10 +149,10 @@ export default function NotesPage() {
             <button
               key={opt.key}
               onClick={() => setSortOption(opt.key)}
-              className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 transition-transform duration-300 ${
+              className={`px-3 py-1 rounded-full text-xs flex items-center gap-1 border border-white/10 bg-white/5 transition ${
                 sortOption === opt.key
                   ? 'bg-violet-500 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105'
+                  : 'text-slate-300 hover:bg-white/10'
               }`}
             >
               <span>{opt.icon}</span> {opt.label}
@@ -162,10 +165,10 @@ export default function NotesPage() {
             <button
               key={tag}
               onClick={() => setActiveTag(activeTag === tag ? null : tag)}
-              className={`px-3 py-1 rounded-full text-xs transition-transform duration-300 ${
+              className={`px-3 py-1 rounded-full text-xs border border-white/10 bg-white/5 transition ${
                 activeTag === tag
                   ? 'bg-violet-500 text-white'
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600 hover:scale-105'
+                  : 'text-slate-300 hover:bg-white/10'
               }`}
             >
               {tag}
@@ -174,19 +177,70 @@ export default function NotesPage() {
         </div>
 
         <div className="text-sm text-slate-400 flex gap-4">
-          <span>Всего конспектов: {notes.length}</span>
+          <span>Всего заметок: {notes.length}</span>
           <span>Тегов: {uniqueTags.length}</span>
           <span>Последнее обновление: {lastUpdate}</span>
         </div>
       </header>
 
       <Section
-        title="Все конспекты"
+        title="Все заметки"
         notes={sortedNotes}
         generateDescription={generateDescription}
         router={router}
       />
-    </div>
+    </main>
+  );
+}
+
+function FileImporter({ onImport }: { onImport: (title: string, content: string) => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const handleClick = () => inputRef.current?.click();
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const ext = file.name.split('.').pop()?.toLowerCase();
+    let text = '';
+
+    try {
+      if (ext === 'txt' || ext === 'md') {
+        text = await file.text();
+      } else if (ext === 'docx') {
+        text = await readDocxFile(file);
+      } else {
+        alert('Неподдерживаемый формат');
+        return;
+      }
+
+      onImport(file.name.replace(/\.[^/.]+$/, ''), text);
+    } catch (err) {
+      console.error('Ошибка импорта:', err);
+      alert('Не удалось импортировать файл');
+    } finally {
+      e.target.value = '';
+    }
+  };
+
+  return (
+    <>
+      <button
+        onClick={handleClick}
+        className="rounded-xl bg-violet-500 px-4 py-2 text-sm font-semibold text-white inline-flex items-center gap-2 hover:bg-violet-600 transition-transform hover:scale-105"
+      >
+        <UploadCloud size={16} />
+        Импорт заметки
+      </button>
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".txt,.md,.docx"
+        onChange={handleFile}
+        className="hidden"
+      />
+    </>
   );
 }
 
@@ -202,8 +256,8 @@ function Section({
   router: any;
 }) {
   return (
-    <section className="animate-fadeInUp">
-      <h2 className="text-lg font-semibold mb-2">{title}</h2>
+    <section className="space-y-4">
+      <h2 className="text-lg font-semibold">{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {notes.map(note => (
           <NoteCard
@@ -231,26 +285,37 @@ function NoteCard({
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const exportMarkdown = () => {
-    const blob = new Blob([`# ${note.title}\n\n${note.content ?? ''}`], {
-      type: 'text/markdown;charset=utf-8',
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const safeName = (note.title || 'note').trim().replace(/\s+/g, '_');
-    a.href = url;
-    a.download = `${safeName}.md`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try {
+      const blob = new Blob([`# ${note.title}\n\n${note.content ?? ''}`], {
+        type: 'text/markdown;charset=utf-8',
+      });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      const safeName = (note.title || 'note').trim().replace(/\s+/g, '_');
+      a.href = url;
+      a.download = `${safeName}.md`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Ошибка экспорта:', err);
+      alert('Не удалось экспортировать заметку');
+    }
   };
 
   const deleteNote = async () => {
-    const { error } = await supabase.from('notes').delete().eq('id', note.id);
-    if (error) {
-      console.error('Ошибка удаления:', error);
-      return;
+    try {
+      const { error } = await supabase.from('notes').delete().eq('id', note.id);
+      if (error) {
+        console.error('Ошибка удаления:', error);
+        alert('Не удалось удалить заметку');
+        return;
+      }
+      setConfirmDeleteOpen(false);
+      router.refresh?.();
+    } catch (err) {
+      console.error('Ошибка удаления:', err);
+      alert('Не удалось удалить заметку');
     }
-    setConfirmDeleteOpen(false);
-    router.refresh?.();
   };
 
   const formattedDate = new Intl.DateTimeFormat('ru-RU', {
@@ -261,45 +326,47 @@ function NoteCard({
   }).format(new Date(note.updated_at ?? note.created_at));
 
   return (
-    <div
-      className="rounded-xl bg-slate-800 p-4 space-y-2 shadow hover:shadow-2xl transition-transform duration-300 hover:scale-105 hover:-translate-y-1 animate-fadeInUp cursor-pointer"
+    <article
+      className="space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 cursor-pointer"
       onClick={() => router.push(`/notes/view?id=${note.id}`)}
     >
-      <h3 className="text-lg font-bold">{note.title}</h3>
-      <p className="text-sm text-slate-300">
+      <h3 className="text-xl font-semibold">{note.title}</h3>
+      <p className="text-sm text-slate-200">
         {note.content ? generateDescription(note.content) : 'Описание отсутствует'}
       </p>
       <p className="text-xs text-slate-400">Обновлено {formattedDate}</p>
+
       {note.tags && note.tags.length > 0 && (
-        <ul className="flex flex-wrap gap-2 text-xs text-slate-300">
+        <div className="flex flex-wrap gap-2">
           {note.tags.map(tag => (
-            <li
+            <span
               key={tag}
-              className="rounded-full border border-violet-300/40 bg-violet-400/10 px-3 py-1 uppercase tracking-[0.2em]"
+              className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs text-slate-300"
             >
               {tag}
-            </li>
+            </span>
           ))}
-        </ul>
+        </div>
       )}
-      <div className="flex gap-3 pt-2">
+
+      <div className="flex gap-2 pt-2">
         <button
           onClick={e => {
             e.stopPropagation();
             exportMarkdown();
           }}
-          className="inline-flex items-center gap-2 text-sm text-cyan-400 hover:text-cyan-300"
+          className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-cyan-300 hover:bg-cyan-500/20"
         >
-          <FileDown size={16} /> Экспорт .md
+          <FileDown size={14} /> Экспорт .md
         </button>
         <button
           onClick={e => {
             e.stopPropagation();
             setConfirmDeleteOpen(true);
           }}
-          className="inline-flex items-center gap-2 text-sm text-red-400 hover:text-red-300"
+          className="inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-red-300 hover:bg-red-500/20"
         >
-          <Trash2 size={16} /> Удалить
+          <Trash2 size={14} /> Удалить
         </button>
       </div>
 
@@ -307,7 +374,7 @@ function NoteCard({
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-slate-900 p-6 text-white shadow-xl space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Удалить конспект?</h2>
+              <h2 className="text-lg font-semibold">Удалить заметку?</h2>
               <button
                 onClick={() => setConfirmDeleteOpen(false)}
                 className="text-slate-400 hover:text-white"
@@ -336,7 +403,6 @@ function NoteCard({
           </div>
         </div>
       )}
-    </div>
+    </article>
   );
 }
-     
