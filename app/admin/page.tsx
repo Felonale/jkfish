@@ -257,7 +257,12 @@ export default function AdminPage() {
     );
     setStudents((studs ?? []) as StudentRow[]);
     setCourses(coursesData);
-    setEnrollments((enr ?? []) as EnrollmentRow[]);
+    const enrollmentsData = (enr ?? []).map((e: any) => ({
+      student_inn: e.student_inn,
+      course_id: e.course_id,
+      courses: Array.isArray(e.courses) ? e.courses[0] ?? null : e.courses ?? null,
+    })) as EnrollmentRow[];
+    setEnrollments(enrollmentsData);
     if (sessErr) setError(sessErr.message);
     setSessions((sess ?? []) as SessionRow[]);
 
