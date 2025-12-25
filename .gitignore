@@ -38,6 +38,7 @@ out/
 coverage/
 .pnp
 .pnp.js
+*.pptx
 
 # Next.js specific files
 next-env.d.ts # This file is usually generated and can be ignored if not manually managed.
