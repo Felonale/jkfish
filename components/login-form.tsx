@@ -38,8 +38,45 @@ export function LoginForm({
         password,
       });
       if (error) throw error;
-      // Update this route to redirect to an authenticated route. The user already has an active session.
-      router.push("/protected");
+
+      const { data: userData } = await supabase.auth.getUser();
+      const user = userData?.user;
+
+      if (!user) {
+        router.push("/auth/login");
+        return;
+      }
+
+      const [{ data: student }, { data: teacher }, { data: superadmin }] =
+        await Promise.all([
+          supabase
+            .from("students")
+            .select("inn")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("teachers")
+            .select("id")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+          supabase
+            .from("superadmins")
+            .select("user_id")
+            .eq("user_id", user.id)
+            .maybeSingle(),
+        ]);
+
+      if (teacher || superadmin) {
+        router.push("/profile");
+        return;
+      }
+
+      if (!student) {
+        router.push("/profile/onboarding");
+        return;
+      }
+
+      router.push("/profile");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
